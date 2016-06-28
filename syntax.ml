@@ -75,6 +75,43 @@ let dayopts_of_sexp sexp =
         | "inc" -> IncDay (List.map opts dayopt_of_sexp)
         | "excl" -> ExclDay (List.map opts dayopt_of_sexp)
 
+type monthopt =
+  | NthMonth of bexp
+  | Mensis of Month.t
+
+let sexp_of_monthopt = function
+  | NthMonth exp -> Sexp.List [Sexp.Atom "nth"; sexp_of_bexp exp]
+  | Mensis m -> Sexp.Atom begin match m with
+    | Jan -> "jan" | Feb -> "feb" | Mar -> "mar" | Apr -> "apr"
+    | May -> "may" | Jun -> "jun" | Jul -> "jul" | Aug -> "aug"
+    | Sep -> "sep" | Oct -> "oct" | Nov -> "nov" | Dec -> "dec"
+  end
+
+let monthopt_of_sexp = function
+  | Sexp.List (Sexp.Atom "nth" :: exp :: []) -> NthMonth (bexp_of_sexp exp)
+  | Sexp.Atom m -> Mensis begin match m with
+    | "jan" -> Jan | "feb" -> Feb | "mar" -> Mar | "apr" -> Apr
+    | "may" -> May | "jun" -> Jun | "jul" -> Jul | "aug" -> Aug
+    | "sep" -> Sep | "oct" -> Oct | "nov" -> Nov | "dec" -> Dec
+  end
+
+type monthopts =
+  | IncMonth of monthopt list
+  | ExclMonth of monthopt list
+  | Day of dayopts list
+
+let sexp_of_monthopts = function
+  | IncMonth o -> Sexp.List (Sexp.Atom "inc" :: List.map o sexp_of_monthopt)
+  | ExclMonth o -> Sexp.List (Sexp.Atom "excl" :: List.map o sexp_of_monthopt)
+  | Day o -> Sexp.List (Sexp.Atom "day" :: List.map o sexp_of_dayopts)
+
+let monthopts_of_sexp = function
+  | Sexp.List (Sexp.Atom s :: opts) ->
+    match s with
+      | "inc" -> IncMonth (List.map opts monthopt_of_sexp)
+      | "excl" -> ExclMonth (List.map opts monthopt_of_sexp)
+      | "day" -> Day (List.map opts dayopts_of_sexp)
+
 type yearopt =
   | NthYear of bexp
   | Annus of int
@@ -90,11 +127,15 @@ let yearopt_of_sexp sexp =
 
 type yearopts =
   | IncYear of yearopt list
+  | ExclYear of yearopt list
+  | Month of monthopts list
   | Day of dayopts list
 
 let sexp_of_yearopts opts =
   match opts with
     | IncYear o -> Sexp.List (Sexp.Atom "inc" :: List.map o sexp_of_yearopt)
+    | ExclYear o -> Sexp.List (Sexp.Atom "excl" :: List.map o sexp_of_yearopt)
+    | Month o -> Sexp.List (Sexp.Atom "month" :: List.map o sexp_of_monthopts)
     | Day o -> Sexp.List (Sexp.Atom "day" :: List.map o sexp_of_dayopts)
 
 let yearopts_of_sexp sexp =
@@ -102,18 +143,22 @@ let yearopts_of_sexp sexp =
     | Sexp.List (Sexp.Atom s :: opts) ->
       match s with
         | "inc" -> IncYear (List.map opts yearopt_of_sexp)
+        | "excl" -> ExclYear (List.map opts yearopt_of_sexp)
+        | "month" -> Month (List.map opts monthopts_of_sexp)
         | "day" -> Day (List.map opts dayopts_of_sexp)
 
 type selector =
   | Or of selector list
   | And of selector list
   | Year of yearopts list
+  | Month of monthopts list
   | Day of dayopts list
 
 let rec sexp_of_selector = function
   | Or selectors -> Sexp.List (Sexp.Atom "or" :: List.map selectors sexp_of_selector)
   | And selectors -> Sexp.List (Sexp.Atom "and" :: List.map selectors sexp_of_selector)
   | Year opt -> Sexp.List (Sexp.Atom "year" :: List.map opt sexp_of_yearopts)
+  | Month opt -> Sexp.List (Sexp.Atom "month" :: List.map opt sexp_of_monthopts)
   | Day opt -> Sexp.List (Sexp.Atom "day" :: List.map opt sexp_of_dayopts)
 
 let rec selector_of_sexp sexp =
@@ -123,5 +168,6 @@ let rec selector_of_sexp sexp =
         | "or" -> Or (List.map opts selector_of_sexp)
         | "and" -> And (List.map opts selector_of_sexp)
         | "year" -> Year (List.map opts yearopts_of_sexp)
+        | "month" -> Month (List.map opts monthopts_of_sexp)
         | "day" -> Day (List.map opts dayopts_of_sexp)
       end

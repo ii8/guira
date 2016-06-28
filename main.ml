@@ -6,7 +6,7 @@ let list_dates sdate edate selector fmt =
       then print_endline (Date.format d fmt) in
 
   let rec loop d =
-    if edate > d
+    if edate >= d
       then (run d; loop (Date.add_days d 1)) in
 
   loop sdate

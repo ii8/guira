@@ -21,17 +21,17 @@ let year_start d = Date.create_exn ~y:(Date.year d) ~m:Jan ~d:1
 
 let eval i s expression =
   let first = match s.i with
-    | Days -> s.d
+    | Days -> assert false
     | Weeks -> week_start s.d
     | Months -> month_start s.d
     | Years -> year_start s.d
-    | Eternity -> Date.add_days s.r 1 in
+    | Eternity -> s.r in
   let n = match i with
     | Days -> Date.diff s.d first + 1
     | Weeks -> let a = (Date.diff s.d first + 1) mod 7 in (Date.diff s.d first + a) / 7
     | Months ->
       let m a = Date.month a |> Month.to_int in
-      (m s.d - m first) + (Date.year s.d - Date.year first) * 12
+      (m s.d - (m first - 1)) + (Date.year s.d - Date.year first) * 12
     | Years -> Date.year s.d - Date.year first in
 
   let rec ev = function
@@ -63,6 +63,23 @@ let rec filter_days s op =
     | ExclDay l :: [] -> not (match_days s l)
     | ExclDay l :: ls -> if match_days s l then false else filter_days s ls
 
+let rec match_months s pats =
+  match pats with
+    | [] -> false
+    | NthMonth exp :: [] -> eval Months s exp
+    | NthMonth exp :: rest -> if eval Months s exp then true else match_months s rest
+    | Mensis m :: [] -> m = Date.month s.d
+    | Mensis m :: rest -> if m = Date.month s.d then true else match_months s rest
+
+let rec filter_months s op =
+  match op with
+    | [] -> true
+    | IncMonth l :: [] -> match_months s l
+    | IncMonth l :: ls -> if match_months s l then filter_months s ls else false
+    | ExclMonth l :: [] -> not (match_months s l)
+    | ExclMonth l :: ls -> if match_months s l then false else filter_months s ls
+    | Day opts :: [] -> filter_days { s with i = Months } opts
+
 let rec match_years s pats =
   match pats with
     | [] -> false
@@ -76,12 +93,17 @@ let rec filter_years s op =
     | [] -> true
     | IncYear l :: [] -> match_years s l
     | IncYear l :: ls -> if match_years s l then filter_years s ls else false
-    | Day opts :: [] -> filter_days {s with i = Years} opts
+    | ExclYear l :: [] -> not (match_years s l)
+    | ExclYear l :: ls -> if match_years s l then false else filter_years s ls
+    | Month opts :: [] -> filter_months { s with i = Years } opts
+    | Day opts :: [] -> filter_days { s with i = Years } opts
 
 let rec filter selector d r =
   let filt s = filter s d r in
+  let s = { d; r; i = Eternity } in
   match selector with
     | Or fs -> List.exists (List.map fs filt) (fun i -> i)
     | And fs -> List.for_all (List.map fs filt) (fun i -> i)
-    | Year opts -> filter_years { d; r; i = Eternity } opts
-    | Day opts -> filter_days { d; r; i = Eternity } opts
+    | Year opts -> filter_years s opts
+    | Month opts -> filter_months s opts
+    | Day opts -> filter_days s opts
