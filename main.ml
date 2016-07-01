@@ -6,13 +6,13 @@ let list_dates sdate edate selector fmt =
       then print_endline (Date.format d fmt) in
 
   let rec loop d =
-    if edate >= d
+    if edate > d
       then (run d; loop (Date.add_days d 1)) in
 
   loop sdate
 
 let command =
-  let now = Date.today Core.Zone.local in
+  let now = Date.today ~zone:Core.Zone.local in
   let last_day = Date.create_exn ~y:9999 ~m:Dec ~d:31 in
   Command.basic
     ~summary:"s-expression language to query dates"
@@ -24,7 +24,13 @@ let command =
       +> anon (maybe ("date" %: date))
     )
     (fun sdate edate fmt date () ->
-      let selector = Sexp.input_sexp stdin |> Syntax.selector_of_sexp in
+      let sexp = Sexp.input_sexp stdin in
+      let selector = try Syntax.selector_of_sexp sexp with
+        | a -> begin match a with
+          | Syntax.Syntax e -> print_endline ("Error: " ^ e)
+          | Failure "int_of_string" -> print_endline "Error: bad integer"
+          | _ -> print_endline "Error: invalid expression"
+        end; exit 2 in
       match date with
         | None -> list_dates sdate edate selector fmt
         | Some d -> exit (if Filter.filter selector d sdate then 0 else 1)

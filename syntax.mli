@@ -1,5 +1,7 @@
 open Core.Std
 
+exception Syntax of string
+
 type exp =
   | Variable
   | Constant of int
@@ -8,7 +10,7 @@ type exp =
 
 type bexp =
   | Nth of exp
-  | Equal of exp * exp
+  | Equal_to of exp * exp
 
 type dayopt =
   | NthDay of bexp

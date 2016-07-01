@@ -32,17 +32,18 @@ let eval i s expression =
     | Months ->
       let m a = Date.month a |> Month.to_int in
       (m s.d - (m first - 1)) + (Date.year s.d - Date.year first) * 12
-    | Years -> Date.year s.d - Date.year first in
+    | Years -> Date.year s.d - Date.year first
+    | Eternity -> assert false in
 
   let rec ev = function
     | Variable -> n
     | Constant x -> x
     | Modulo (x, y) -> (ev x) mod (ev y)
-    | Sum xs -> List.map xs ev |> List.fold ~init:0 ~f:(+)
+    | Sum xs -> List.map ~f:ev xs |> List.fold ~init:0 ~f:(+)
   in
   match expression with
     | Nth exp -> ev exp = n
-    | Equal (a, b) -> ev a = ev b
+    | Equal_to (a, b) -> ev a = ev b
 
 let rec match_days s pats =
   match pats with
@@ -79,6 +80,7 @@ let rec filter_months s op =
     | ExclMonth l :: [] -> not (match_months s l)
     | ExclMonth l :: ls -> if match_months s l then false else filter_months s ls
     | Day opts :: [] -> filter_days { s with i = Months } opts
+    | _ -> assert false
 
 let rec match_years s pats =
   match pats with
@@ -97,13 +99,14 @@ let rec filter_years s op =
     | ExclYear l :: ls -> if match_years s l then false else filter_years s ls
     | Month opts :: [] -> filter_months { s with i = Years } opts
     | Day opts :: [] -> filter_days { s with i = Years } opts
+    | _ -> assert false
 
 let rec filter selector d r =
-  let filt s = filter s d r in
+  let f s = filter s d r in
   let s = { d; r; i = Eternity } in
   match selector with
-    | Or fs -> List.exists (List.map fs filt) (fun i -> i)
-    | And fs -> List.for_all (List.map fs filt) (fun i -> i)
+    | Or fs -> List.exists (List.map ~f fs) ~f:(fun i -> i)
+    | And fs -> List.for_all (List.map ~f fs) ~f:(fun i -> i)
     | Year opts -> filter_years s opts
     | Month opts -> filter_months s opts
     | Day opts -> filter_days s opts
