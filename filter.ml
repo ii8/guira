@@ -28,7 +28,9 @@ let eval i s expression =
     | Eternity -> s.r in
   let n = match i with
     | Days -> Date.diff s.d first + 1
-    | Weeks -> let a = (Date.diff s.d first + 1) mod 7 in (Date.diff s.d first + a) / 7
+    | Weeks ->
+      let a = (Date.diff s.d first + 1) mod 7 in
+      (Date.diff s.d first + a) / 7
     | Months ->
       let m a = Date.month a |> Month.to_int in
       (m s.d - (m first - 1)) + (Date.year s.d - Date.year first) * 12
