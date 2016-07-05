@@ -17,7 +17,7 @@ let week_start d =
 
 let month_start d = Date.create_exn ~y:(Date.year d) ~m:(Date.month d) ~d:1
 
-let year_start d = Date.create_exn ~y:(Date.year d) ~m:Jan ~d:1
+let year_start d = Date.create_exn ~y:(Date.year d) ~m:Month.Jan ~d:1
 
 let eval i s expression =
   let first = match s.i with

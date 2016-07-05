@@ -1,0 +1,27 @@
+OASISFormat: 0.4
+Name:        guira
+Version:     0.1.0
+Synopsis:    s-expression language to query dates
+Authors:     Murray <murray.calavera@gmail.com>
+License:     PD
+Plugins:     META (0.4), DevFiles (0.4)
+
+Library guira
+  Install:         true
+  Path:            .
+  BuildTools:      ocamlbuild
+  BuildDepends:    core, threads
+  Modules:         Guira
+  InternalModules: Syntax, Filter
+
+Executable guira
+  Install:         true
+  Path:            .
+  BuildTools:      ocamlbuild
+  BuildDepends:    core, threads
+  MainIs:          main.ml
+
+SourceRepository github
+  Type:            git
+  Location:        https://github.com/sir-murray/guira.git
+

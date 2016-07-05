@@ -1,4 +1,6 @@
 open Core.Std
+open Month
+open Day_of_week
 
 exception Syntax of string
 

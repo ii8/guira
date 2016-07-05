@@ -1,0 +1,18 @@
+opam-version: "1.2"
+name: "guira"
+version: "0.1.0"
+maintainer: "Murray <murray.calavera@gmail.com>"
+authors: "Murray <murray.calavera@gmail.com>"
+bug-reports: "https://github.com/sir-murray/guira/issues"
+license: "Unlicense"
+dev-repo: "https://github.com/sir-murray/guira.git"
+build: [
+  ["./configure" "--prefix=%{prefix}%"]
+  [make]
+]
+install: [make "install"]
+remove: [make "uninstall"]
+depends: [
+  "ocamlfind" {build}
+  "core"
+]
