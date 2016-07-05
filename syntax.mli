@@ -1,3 +1,4 @@
+open Sexp
 open Core.Std
 
 exception Syntax of string
@@ -46,5 +47,5 @@ type selector =
   | Month of monthopts list
   | Day of dayopts list
 
-val sexp_of_selector : selector -> Sexp.t
-val selector_of_sexp : Sexp.t -> selector
+val sexp_of_selector : selector -> sexp
+val selector_of_sexp : sexp -> selector

@@ -1,3 +1,4 @@
+open Sexp
 open Core.Std
 
 type interval = Day | Week | Month | Year
@@ -44,11 +45,11 @@ let list_dates sdate edate selector fmt interval =
   loop sdate
 
 let run o =
-  let sexp = Sexp.input_sexp stdin in
-  let selector = try Syntax.selector_of_sexp sexp with
+  let selector = try parse () |> Syntax.selector_of_sexp with
     | a -> begin match a with
       | Syntax.Syntax e -> prerr_endline ("Error: " ^ e)
       | Failure "int_of_string" -> prerr_endline "Error: bad integer"
+      | Failure e -> prerr_endline ("Error: " ^ e)
       | _ -> prerr_endline "Error: invalid expression"
     end; exit 2 in
 

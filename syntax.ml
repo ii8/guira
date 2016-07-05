@@ -1,3 +1,4 @@
+open Sexp
 open Core.Std
 open Month
 open Day_of_week
@@ -24,18 +25,18 @@ type exp =
   | Sum of exp list
 
 let rec sexp_of_exp = function
-  | Variable -> Sexp.Atom "n"
-  | Constant i -> Int.sexp_of_t i
-  | Modulo (a, b) -> Sexp.List [Sexp.Atom "mod"; sexp_of_exp a; sexp_of_exp b]
-  | Sum a -> Sexp.List (Sexp.Atom "+" :: List.map ~f:sexp_of_exp a)
+  | Variable -> Atom "n"
+  | Constant i -> Atom (string_of_int i)
+  | Modulo (a, b) -> List [Atom "mod"; sexp_of_exp a; sexp_of_exp b]
+  | Sum a -> List (Atom "+" :: List.map ~f:sexp_of_exp a)
 
 let rec exp_of_sexp = function
-  | Sexp.Atom "n" -> Variable
-  | Sexp.Atom i -> Constant (int_of_string i)
-  | Sexp.List (Sexp.Atom "mod" :: a :: b :: []) -> Modulo (exp_of_sexp a, exp_of_sexp b)
-  | Sexp.List (Sexp.Atom "+" :: ints) -> Sum (List.map ~f:exp_of_sexp ints)
-  | Sexp.List (Sexp.Atom s :: _) -> expect ["+"; "mod"] s
-  | Sexp.List [] -> err ~e:"empty nth selector" ()
+  | Atom "n" -> Variable
+  | Atom i -> Constant (int_of_string i)
+  | List (Atom "mod" :: a :: b :: []) -> Modulo (exp_of_sexp a, exp_of_sexp b)
+  | List (Atom "+" :: ints) -> Sum (List.map ~f:exp_of_sexp ints)
+  | List (Atom s :: _) -> expect ["+"; "mod"] s
+  | List [] -> err ~e:"empty nth selector" ()
   | _ -> err ()
 
 type bexp =
@@ -44,10 +45,10 @@ type bexp =
 
 let sexp_of_bexp = function
   | Nth exp -> sexp_of_exp exp
-  | Equal_to (x, y) -> Sexp.List [Sexp.Atom "eq"; sexp_of_exp x; sexp_of_exp y]
+  | Equal_to (x, y) -> List [Atom "eq"; sexp_of_exp x; sexp_of_exp y]
 
 let bexp_of_sexp = function
-  | Sexp.List (Sexp.Atom "eq" :: x :: y :: []) -> Equal_to (exp_of_sexp x, exp_of_sexp y)
+  | List (Atom "eq" :: x :: y :: []) -> Equal_to (exp_of_sexp x, exp_of_sexp y)
   | sexp -> Nth (exp_of_sexp sexp)
 
 type dayopt =
@@ -55,8 +56,8 @@ type dayopt =
   | Weekday of Day_of_week.t
 
 let sexp_of_dayopt = function
-  | NthDay exp -> Sexp.List [Sexp.Atom "nth"; sexp_of_bexp exp]
-  | Weekday day -> Sexp.Atom begin match day with
+  | NthDay exp -> List [Atom "nth"; sexp_of_bexp exp]
+  | Weekday day -> Atom begin match day with
     | Mon -> "mon"
     | Tue -> "tue"
     | Wed -> "wed"
@@ -67,8 +68,8 @@ let sexp_of_dayopt = function
   end
 
 let dayopt_of_sexp = function
-  | Sexp.List (Sexp.Atom "nth" :: exp :: []) -> NthDay (bexp_of_sexp exp)
-  | Sexp.Atom s -> Weekday begin match s with
+  | List (Atom "nth" :: exp :: []) -> NthDay (bexp_of_sexp exp)
+  | Atom s -> Weekday begin match s with
     | "mon" -> Mon
     | "tue" -> Tue
     | "wed" -> Wed
@@ -85,14 +86,14 @@ type dayopts =
   | ExclDay of dayopt list
 
 let sexp_of_dayopts opts =
-  let f n x = Sexp.List (Sexp.Atom n :: List.map ~f:sexp_of_dayopt x) in
+  let f n x = List (Atom n :: List.map ~f:sexp_of_dayopt x) in
   match opts with
     | IncDay x -> f "inc" x
     | ExclDay x -> f "excl" x
 
 let dayopts_of_sexp sexp =
   match sexp with
-    | Sexp.List (Sexp.Atom s :: opts) ->
+    | List (Atom s :: opts) ->
       begin match s with
         | "inc" -> IncDay (List.map ~f:dayopt_of_sexp opts)
         | "excl" -> ExclDay (List.map ~f:dayopt_of_sexp opts)
@@ -105,16 +106,16 @@ type monthopt =
   | Mensis of Month.t
 
 let sexp_of_monthopt = function
-  | NthMonth exp -> Sexp.List [Sexp.Atom "nth"; sexp_of_bexp exp]
-  | Mensis m -> Sexp.Atom begin match m with
+  | NthMonth exp -> List [Atom "nth"; sexp_of_bexp exp]
+  | Mensis m -> Atom begin match m with
     | Jan -> "jan" | Feb -> "feb" | Mar -> "mar" | Apr -> "apr"
     | May -> "may" | Jun -> "jun" | Jul -> "jul" | Aug -> "aug"
     | Sep -> "sep" | Oct -> "oct" | Nov -> "nov" | Dec -> "dec"
   end
 
 let monthopt_of_sexp = function
-  | Sexp.List (Sexp.Atom "nth" :: exp :: []) -> NthMonth (bexp_of_sexp exp)
-  | Sexp.Atom m ->
+  | List (Atom "nth" :: exp :: []) -> NthMonth (bexp_of_sexp exp)
+  | Atom m ->
     Mensis begin match m with
       | "jan" -> Jan | "feb" -> Feb | "mar" -> Mar | "apr" -> Apr
       | "may" -> May | "jun" -> Jun | "jul" -> Jul | "aug" -> Aug
@@ -129,12 +130,12 @@ type monthopts =
   | Day of dayopts list
 
 let sexp_of_monthopts = function
-  | IncMonth o -> Sexp.List (Sexp.Atom "inc" :: List.map ~f:sexp_of_monthopt o)
-  | ExclMonth o -> Sexp.List (Sexp.Atom "excl" :: List.map ~f:sexp_of_monthopt o)
-  | Day o -> Sexp.List (Sexp.Atom "day" :: List.map ~f:sexp_of_dayopts o)
+  | IncMonth o -> List (Atom "inc" :: List.map ~f:sexp_of_monthopt o)
+  | ExclMonth o -> List (Atom "excl" :: List.map ~f:sexp_of_monthopt o)
+  | Day o -> List (Atom "day" :: List.map ~f:sexp_of_dayopts o)
 
 let monthopts_of_sexp = function
-  | Sexp.List (Sexp.Atom s :: opts) ->
+  | List (Atom s :: opts) ->
     begin match s with
       | "inc" -> IncMonth (List.map ~f:monthopt_of_sexp opts)
       | "excl" -> ExclMonth (List.map ~f:monthopt_of_sexp opts)
@@ -148,13 +149,13 @@ type yearopt =
   | Annus of int
 
 let sexp_of_yearopt = function
-  | NthYear exp -> Sexp.List [Sexp.Atom "nth"; sexp_of_bexp exp]
-  | Annus i -> Int.sexp_of_t i
+  | NthYear exp -> List [Atom "nth"; sexp_of_bexp exp]
+  | Annus i -> Atom (string_of_int i)
 
 let yearopt_of_sexp sexp =
   match sexp with
-    | Sexp.List (Sexp.Atom "nth" :: exp :: []) -> NthYear (bexp_of_sexp exp)
-    | Sexp.Atom _ -> Annus (Int.t_of_sexp sexp)
+    | List (Atom "nth" :: exp :: []) -> NthYear (bexp_of_sexp exp)
+    | Atom s -> Annus (int_of_string s)
     | _ -> err ()
 
 type yearopts =
@@ -165,14 +166,14 @@ type yearopts =
 
 let sexp_of_yearopts opts =
   match opts with
-    | IncYear o -> Sexp.List (Sexp.Atom "inc" :: List.map ~f:sexp_of_yearopt o)
-    | ExclYear o -> Sexp.List (Sexp.Atom "excl" :: List.map ~f:sexp_of_yearopt o)
-    | Month o -> Sexp.List (Sexp.Atom "month" :: List.map ~f:sexp_of_monthopts o)
-    | Day o -> Sexp.List (Sexp.Atom "day" :: List.map ~f:sexp_of_dayopts o)
+    | IncYear o -> List (Atom "inc" :: List.map ~f:sexp_of_yearopt o)
+    | ExclYear o -> List (Atom "excl" :: List.map ~f:sexp_of_yearopt o)
+    | Month o -> List (Atom "month" :: List.map ~f:sexp_of_monthopts o)
+    | Day o -> List (Atom "day" :: List.map ~f:sexp_of_dayopts o)
 
 let yearopts_of_sexp sexp =
   match sexp with
-    | Sexp.List (Sexp.Atom s :: opts) ->
+    | List (Atom s :: opts) ->
       begin match s with
         | "inc" -> IncYear (List.map ~f:yearopt_of_sexp opts)
         | "excl" -> ExclYear (List.map ~f:yearopt_of_sexp opts)
@@ -190,15 +191,15 @@ type selector =
   | Day of dayopts list
 
 let rec sexp_of_selector = function
-  | Or s -> Sexp.List (Sexp.Atom "or" :: List.map ~f:sexp_of_selector s)
-  | And s -> Sexp.List (Sexp.Atom "and" :: List.map ~f:sexp_of_selector s)
-  | Year o -> Sexp.List (Sexp.Atom "year" :: List.map ~f:sexp_of_yearopts o)
-  | Month o -> Sexp.List (Sexp.Atom "month" :: List.map ~f:sexp_of_monthopts o)
-  | Day o -> Sexp.List (Sexp.Atom "day" :: List.map ~f:sexp_of_dayopts o)
+  | Or s -> List (Atom "or" :: List.map ~f:sexp_of_selector s)
+  | And s -> List (Atom "and" :: List.map ~f:sexp_of_selector s)
+  | Year o -> List (Atom "year" :: List.map ~f:sexp_of_yearopts o)
+  | Month o -> List (Atom "month" :: List.map ~f:sexp_of_monthopts o)
+  | Day o -> List (Atom "day" :: List.map ~f:sexp_of_dayopts o)
 
 let rec selector_of_sexp sexp =
   match sexp with
-    | Sexp.List (Sexp.Atom s :: opts) ->
+    | List (Atom s :: opts) ->
       begin match s with
         | "or" -> Or (List.map ~f:selector_of_sexp opts)
         | "and" -> And (List.map ~f:selector_of_sexp opts)
