@@ -46,6 +46,7 @@ let eval i s expression =
   match expression with
     | Equal_to_n exp -> ev exp = n
     | Equal_to (a, b) -> ev a = ev b
+    | Greater_than (a, b) -> ev a > ev b
 
 let filter_any i f s = function
   | All -> true

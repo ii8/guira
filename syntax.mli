@@ -13,6 +13,7 @@ type exp =
 type bexp =
   | Equal_to_n of exp
   | Equal_to of exp * exp
+  | Greater_than of exp * exp
 
 type dayopt =
   | Weekday of Core.Std.Day_of_week.t

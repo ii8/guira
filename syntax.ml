@@ -43,13 +43,17 @@ let rec exp_of_sexp = function
 type bexp =
   | Equal_to_n of exp
   | Equal_to of exp * exp
+  | Greater_than of exp * exp
 
 let sexp_of_bexp = function
   | Equal_to_n exp -> sexp_of_exp exp
   | Equal_to (x, y) -> List [Atom "eq"; sexp_of_exp x; sexp_of_exp y]
+  | Greater_than (x, y) -> List [Atom "gt"; sexp_of_exp x; sexp_of_exp y]
 
 let bexp_of_sexp = function
   | List (Atom "eq" :: x :: y :: []) -> Equal_to (exp_of_sexp x, exp_of_sexp y)
+  | List (Atom "gt" :: x :: y :: []) ->
+    Greater_than (exp_of_sexp x, exp_of_sexp y)
   | sexp -> Equal_to_n (exp_of_sexp sexp)
 
 type dayopt =
