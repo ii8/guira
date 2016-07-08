@@ -6,6 +6,7 @@ type state =
   | In_list of sexp list
   | In_atom of char list * sexp list
   | In_string of char list * sexp list
+  | In_comment
 
 let atom cs =
   let len = List.length cs in
@@ -22,11 +23,13 @@ let parse () =
     | Some c -> match state with
       | In_start -> begin match c with
         | ' ' | '\n' | '\t' -> r state
+        | ';' -> ignore (r In_comment); r state
         | '(' -> r (In_list [])
         | _ -> failwith ("expressions must start with '('")
       end
       | In_list es -> begin match c with
         | ' ' | '\n' | '\t' -> r state
+        | ';' -> ignore (r In_comment); r state
         | '(' -> r (In_list (r (In_list []) :: es))
         | ')' -> List (List.rev es)
         | '"' -> r (In_string ([], es))
@@ -34,6 +37,7 @@ let parse () =
       end
       | In_atom (s, es) -> begin match c with
         | ' ' | '\n' | '\t' -> r (In_list (atom s :: es))
+        | ';' -> ignore (r In_comment); r (In_list (atom s :: es))
         | '(' -> r (In_list (r (In_list []) :: atom s :: es))
         | ')' -> List (List.rev (atom s :: es))
         | _ -> r (In_atom (c::s, es))
@@ -41,6 +45,10 @@ let parse () =
       | In_string (s, es) -> begin match c with
         | '"' -> r (In_list (atom s :: es))
         | _ -> r (In_string (c::s, es))
+      end
+      | In_comment -> begin match c with
+        | '\n' -> Atom ""
+        | _ -> r In_comment
       end in
   r In_start
 
