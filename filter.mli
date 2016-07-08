@@ -1,3 +1,2 @@
-open Core.Std
 
-val filter : Syntax.selector -> Date.t -> Date.t -> bool
+val filter : Syntax.selector -> Core.Std.Date.t -> Core.Std.Date.t -> bool

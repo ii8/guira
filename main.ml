@@ -16,11 +16,16 @@ let usage () = print_endline "\
   Usage: guira [OPTION...] [DATE]\n\n\
   s-expression language to query dates\n\n\
   Options:\n  \
-    -s  --start-date DATE                 first day to query (today by default)\n  \
-    -e  --end-date DATE                   last day to query\n  \
-    -f  --format FORMAT                   strftime output format\n  \
-    -i  --interval (day|week|month|year)  interval at which dates are queried\n  \
-    -h  --help                            print this help and exit\
+    -s  --start-date DATE                 \
+    first day to query (today by default)\n  \
+    -e  --end-date DATE                   \
+    last day to query\n  \
+    -f  --format FORMAT                   \
+    strftime output format\n  \
+    -i  --interval (day|week|month|year)  \
+    interval at which dates are queried\n  \
+    -h  --help                            \
+    print this help and exit\
   "
 
 let list_dates sdate edate selector fmt interval =

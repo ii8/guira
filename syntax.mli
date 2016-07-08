@@ -1,7 +1,8 @@
 open Sexp
-open Core.Std
 
 exception Syntax of string
+
+type interval = Days | Weeks | Months | Years | Eternity
 
 type exp =
   | Variable
@@ -10,42 +11,29 @@ type exp =
   | Sum of exp list
 
 type bexp =
-  | Nth of exp
+  | Equal_to_n of exp
   | Equal_to of exp * exp
 
 type dayopt =
-  | NthDay of bexp
-  | Weekday of Day_of_week.t
-
-type dayopts =
-  | IncDay of dayopt list
-  | ExclDay of dayopt list
+  | Weekday of Core.Std.Day_of_week.t
 
 type monthopt =
-  | NthMonth of bexp
-  | Mensis of Month.t
-
-type monthopts =
-  | IncMonth of monthopt list
-  | ExclMonth of monthopt list
-  | Day of dayopts list
+  | Mensis of Core.Std.Month.t
 
 type yearopt =
-  | NthYear of bexp
   | Annus of int
 
-type yearopts =
-  | IncYear of yearopt list
-  | ExclYear of yearopt list
-  | Month of monthopts list
-  | Day of dayopts list
+type 'a anyopt =
+  | All
+  | Not of 'a anyopt
+  | Or of 'a anyopt list
+  | And of 'a anyopt list
+  | Nth of bexp * selector option
+  | Opt of 'a
 
-type selector =
-  | Or of selector list
-  | And of selector list
-  | Year of yearopts list
-  | Month of monthopts list
-  | Day of dayopts list
+and selector =
+  | Day of dayopt anyopt * selector list
+  | Month of monthopt anyopt * selector list
+  | Year of yearopt anyopt * selector list
 
-val sexp_of_selector : selector -> sexp
 val selector_of_sexp : sexp -> selector

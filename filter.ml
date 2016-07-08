@@ -1,7 +1,7 @@
-open Core.Std
+module Date = Core.Std.Date
+module Month = Core.Std.Month
+module Day_of_week = Core.Std.Day_of_week
 open Syntax
-
-type interval = Days | Weeks | Months | Years | Eternity
 
 type state = {
   d : Date.t;
@@ -41,74 +41,44 @@ let eval i s expression =
     | Variable -> n
     | Constant x -> x
     | Modulo (x, y) -> (ev x) mod (ev y)
-    | Sum xs -> List.map ~f:ev xs |> List.fold ~init:0 ~f:(+)
+    | Sum xs -> List.map ev xs |> List.fold_left (+) 0
   in
   match expression with
-    | Nth exp -> ev exp = n
+    | Equal_to_n exp -> ev exp = n
     | Equal_to (a, b) -> ev a = ev b
 
-let rec match_days s pats =
-  match pats with
-    | [] -> false
-    | NthDay exp :: [] -> eval Days s exp
-    | NthDay exp :: rest -> if eval Days s exp then true else match_days s rest
-    | Weekday day :: [] -> day = Date.day_of_week s.d
-    | Weekday day :: rest ->
-      if day = Date.day_of_week s.d
-        then true
-        else match_days s rest
+let filter_any i f s = function
+  | All -> true
+  | Not opt -> not (f s opt)
+  | Or opts -> List.exists (f s) opts
+  | And opts -> List.for_all (f s) opts
+  | Nth (exp, selector) -> eval i s exp
+  | _ -> assert false
 
-let rec filter_days s op =
-  match op with
-    | [] -> true
-    | IncDay l :: [] -> match_days s l
-    | IncDay l :: ls -> if match_days s l then filter_days s ls else false
-    | ExclDay l :: [] -> not (match_days s l)
-    | ExclDay l :: ls -> if match_days s l then false else filter_days s ls
+let rec filter_days s = function
+  | Opt (Weekday day) -> day = Date.day_of_week s.d
+  | a -> filter_any Days filter_days s a
 
-let rec match_months s pats =
-  match pats with
-    | [] -> false
-    | NthMonth exp :: [] -> eval Months s exp
-    | NthMonth exp :: rest -> if eval Months s exp then true else match_months s rest
-    | Mensis m :: [] -> m = Date.month s.d
-    | Mensis m :: rest -> if m = Date.month s.d then true else match_months s rest
+let rec filter_months s = function
+  | Opt (Mensis m) -> m = Date.month s.d
+  | a -> filter_any Months filter_months s a
 
-let rec filter_months s op =
-  match op with
-    | [] -> true
-    | IncMonth l :: [] -> match_months s l
-    | IncMonth l :: ls -> if match_months s l then filter_months s ls else false
-    | ExclMonth l :: [] -> not (match_months s l)
-    | ExclMonth l :: ls -> if match_months s l then false else filter_months s ls
-    | Day opts :: [] -> filter_days { s with i = Months } opts
-    | _ -> assert false
+let rec filter_years s = function
+  | Opt (Annus y) -> y = Date.year s.d
+  | a -> filter_any Years filter_years s a
 
-let rec match_years s pats =
-  match pats with
-    | [] -> false
-    | NthYear exp :: [] -> eval Years s exp
-    | NthYear exp :: rest -> if eval Years s exp then true else match_years s rest
-    | Annus i :: [] -> i = Date.year s.d
-    | Annus i :: rest -> if i = Date.year s.d then true else match_years s rest
-
-let rec filter_years s op =
-  match op with
-    | [] -> true
-    | IncYear l :: [] -> match_years s l
-    | IncYear l :: ls -> if match_years s l then filter_years s ls else false
-    | ExclYear l :: [] -> not (match_years s l)
-    | ExclYear l :: ls -> if match_years s l then false else filter_years s ls
-    | Month opts :: [] -> filter_months { s with i = Years } opts
-    | Day opts :: [] -> filter_days { s with i = Years } opts
-    | _ -> assert false
-
-let rec filter selector d r =
-  let f s = filter s d r in
-  let s = { d; r; i = Eternity } in
-  match selector with
-    | Or fs -> List.exists (List.map ~f fs) ~f:(fun i -> i)
-    | And fs -> List.for_all (List.map ~f fs) ~f:(fun i -> i)
-    | Year opts -> filter_years s opts
-    | Month opts -> filter_months s opts
-    | Day opts -> filter_days s opts
+let filter selector d r =
+  let rec f s = function
+    | Day (opt, []) -> filter_days s opt
+    | Day (opt, sub) -> if filter_days s opt
+      then List.exists (f { s with i = Days }) sub
+      else false
+    | Month (opt, []) -> filter_months s opt
+    | Month (opt, sub) -> if filter_months s opt
+      then List.exists (f { s with i = Months }) sub
+      else false
+    | Year (opt, []) -> filter_years s opt
+    | Year (opt, sub) -> if filter_years s opt
+      then List.exists (f { s with i = Years }) sub
+      else false
+  in f { d; r; i = Eternity } selector
