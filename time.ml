@@ -18,6 +18,7 @@ module Month = struct
     | 1  -> Jan | 2  -> Feb | 3  -> Mar | 4  -> Apr
     | 5  -> May | 6  -> Jun | 7  -> Jul | 8  -> Aug
     | 9  -> Sep | 10 -> Oct | 11 -> Nov | 12 -> Dec
+    | 0  -> Dec
     | a  -> of_int (a mod 12)
 
   let to_int = function
@@ -26,6 +27,7 @@ module Month = struct
     | Sep -> 9  | Oct -> 10 | Nov -> 11 | Dec -> 12
 
   let next m = let n = to_int m + 1 in of_int n
+  let last m = let n = to_int m - 1 in of_int n
 end
 open Month
 
@@ -41,7 +43,7 @@ module Day_of_week = struct
 
   let rec of_int = function
     | 1 -> Mon | 2 -> Tue | 3 -> Wed | 4 -> Thu
-    | 5 -> Fri | 6 -> Sat | 7 -> Sun | a -> of_int (a mod 7)
+    | 5 -> Fri | 6 -> Sat | 7 -> Sun | 0 -> Sun | a -> of_int (a mod 7)
 
   let to_int = function
     | Mon -> 1 | Tue -> 2 | Wed -> 3 | Thu -> 4
@@ -138,6 +140,19 @@ let rata_die t =
 
 let diff a b = rata_die a - rata_die b
 
+let this_monday t =
+  let i = day_of_week t |> Day_of_week.to_int |> (-) (t.day + 1) in
+  if i < 0
+    then if t.month = Jan
+      then let new_year = t.year - 1 in { t with
+        year = new_year;
+        month = Dec;
+        day = 31 + i }
+      else let new_month = Month.last t.month in { t with
+        month = new_month;
+        day = days_in_month t.year new_month + i }
+    else { t with day = i }
+
 (* Tests *)
 
 let test_leap () =
@@ -152,6 +167,18 @@ let test_leap () =
     not (leap 2100);
   ]
 
+let test_next () =
+  let c = create in
+  let last_day = c ~second:59 ~minute:59 ~hour:23 ~day:31 ~month:Dec 1999 in
+  List.for_all (fun a -> a) [
+    next last_day Seconds = c 2000;
+    next last_day Months = c ~second:59 ~minute:59 ~hour:23 ~day:31 2000;
+    next last_day Years = { last_day with year = 2000 };
+    next (c ~day:21 ~month:Jul 2017) Days = c ~day:22 ~month:Jul 2017;
+    next (c ~day:29 ~month:Feb 2016) Years = c ~day:28 ~month:Feb 2017;
+    next last_day Weeks = c ~second:59 ~minute:59 ~hour:23 ~day:7 2000;
+  ]
+
 let test_day_of_week () =
   let mk day month year = create ~day ~month year in
   List.for_all (fun a -> a) [
@@ -160,6 +187,7 @@ let test_day_of_week () =
     day_of_week (mk 27 Mar 1827) = Tue;
     day_of_week (mk 31 Dec 2412) = Mon;
     day_of_week (mk 1 Mar 2000) = Wed;
+    day_of_week (mk 2 Jan 2000) = Sun;
   ]
 
 let test_diff () =
@@ -172,8 +200,17 @@ let test_diff () =
     diff (mk 15 Jun 3065) (mk 1 Jan 2016) = 383_305;
   ]
 
+let test_this_monday () =
+  List.for_all (fun a -> a) [
+    this_monday (create ~day:7 2000) = (create ~day:3 2000);
+    this_monday (create ~month:May 1445) = (create ~day:28 ~month:Apr 1445);
+    this_monday (create ~day:2 2000) = (create ~day:27 ~month:Dec 1999);
+  ]
+
 let tests = [
     "Time.leap", test_leap;
+    "Time.next", test_next;
     "Time.day_of_week", test_day_of_week;
-    "Time.diff", test_diff
+    "Time.diff", test_diff;
+    "Time.this_monday", test_this_monday;
   ]

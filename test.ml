@@ -9,8 +9,8 @@ let () =
       then prerr_endline (green ^ "Passed: " ^ name ^ stop)
       else (pass := false; prerr_endline (red ^ "Failed: " ^ name ^ stop)) in
   List.iter test Time.tests;
-  print_newline ();
+  prerr_newline ();
   if !pass
-    then print_endline (green ^ "All tests have passed" ^ stop)
-    else print_endline (red ^ "Some tests have failed" ^ stop)
+    then prerr_endline (green ^ "All tests have passed" ^ stop)
+    else prerr_endline (red ^ "Some tests have failed" ^ stop)
 
