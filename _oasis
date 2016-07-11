@@ -20,6 +20,19 @@ Executable guira
   BuildTools:      ocamlbuild
   BuildDepends:    core, threads
   MainIs:          main.ml
+  CompiledObject:  native
+
+Executable test
+  Install:         false
+  Path:            .
+  BuildTools:      ocamlbuild
+  Build$:          flag(tests)
+  MainIs:          test.ml
+
+Test unit
+  Run$:            flag(tests)
+  Command:         $test
+  TestTools:       test
 
 SourceRepository github
   Type:            git

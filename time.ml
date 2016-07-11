@@ -1,0 +1,179 @@
+
+type interval
+  = Seconds
+  | Minutes
+  | Hours
+  | Days
+  | Weeks
+  | Months
+  | Years
+  | Eternity
+
+module Month = struct
+  type t
+    = Jan | Feb | Mar | Apr | May | Jun
+    | Jul | Aug | Sep | Oct | Nov | Dec
+
+  let rec of_int = function
+    | 1  -> Jan | 2  -> Feb | 3  -> Mar | 4  -> Apr
+    | 5  -> May | 6  -> Jun | 7  -> Jul | 8  -> Aug
+    | 9  -> Sep | 10 -> Oct | 11 -> Nov | 12 -> Dec
+    | a  -> of_int (a mod 12)
+
+  let to_int = function
+    | Jan -> 1  | Feb -> 2  | Mar -> 3  | Apr -> 4
+    | May -> 5  | Jun -> 6  | Jul -> 7  | Aug -> 8
+    | Sep -> 9  | Oct -> 10 | Nov -> 11 | Dec -> 12
+
+  let next m = let n = to_int m + 1 in of_int n
+end
+open Month
+
+module Day_of_week = struct
+  type t
+    = Mon
+    | Tue
+    | Wed
+    | Thu
+    | Fri
+    | Sat
+    | Sun
+
+  let rec of_int = function
+    | 1 -> Mon | 2 -> Tue | 3 -> Wed | 4 -> Thu
+    | 5 -> Fri | 6 -> Sat | 7 -> Sun | a -> of_int (a mod 7)
+
+  let to_int = function
+    | Mon -> 1 | Tue -> 2 | Wed -> 3 | Thu -> 4
+    | Fri -> 5 | Sat -> 6 | Sun -> 7
+end
+open Day_of_week
+
+type t = {
+  year : int;
+  month : Month.t;
+  day : int;
+  hour : int;
+  minute : int;
+  second : int;
+}
+
+let year t = t.year
+let month t = t.month
+let day t = t.day
+let hour t = t.hour
+let minute t = t.minute
+let second t = t.second
+
+let leap year =
+  year mod 4 = 0 && year mod 100 <> 0 || year mod 400 = 0
+
+let days_in_month year = function
+  | Month.Feb -> if leap year then 29 else 28
+  | Month.Apr | Month.Jun | Month.Sep | Month.Nov -> 30
+  | Month.Jan | Month.Mar | Month.May | Month.Jul
+  | Month.Aug | Month.Oct | Month.Dec -> 31
+
+let create ?second:(second = 0) ?minute:(minute = 0) ?hour:(hour = 0)
+           ?day:(day = 1) ?month:(month = Month.Jan) year =
+  { year; month; day; hour; minute; second }
+
+let rec next date interval =
+  let add_days i =
+    let num_days = days_in_month date.year date.month in
+    let j = date.day + i in
+    if num_days < j
+      then { (next date Months) with day = j - num_days }
+      else { date with day = j }
+  in
+  match interval with
+    | Seconds ->
+      let new_sec = date.second + 1 in
+      if new_sec = 60
+        then { (next date Minutes) with second = 0 }
+        else { date with second = new_sec }
+    | Minutes ->
+      let new_min = date.minute + 1 in
+      if new_min = 60
+        then { (next date Hours) with minute = 0 }
+        else { date with minute = new_min }
+    | Hours ->
+      let new_hour = date.hour + 1 in
+      if new_hour = 24
+        then { (add_days 1) with hour = 0 }
+        else { date with hour = new_hour }
+    | Days -> add_days 1
+    | Weeks -> add_days 7
+    | Months ->
+      let (new_year, new_month) = match date.month with
+        | Month.Dec -> (date.year + 1, Month.Jan)
+        | m -> (date.year, Month.next m) in
+      { date with
+        year = new_year;
+        month = new_month;
+        day = min (days_in_month new_year new_month) date.day }
+    | Years ->
+      if date.month = Month.Feb
+         && date.day = 29
+         && date.year + 1 |> leap |> not
+        then { date with year = date.year + 1; day = 28 }
+        else { date with year = date.year + 1 }
+    | Eternity -> assert false
+
+let day_of_week =
+  let table = [| 0; 3; 2; 5; 0; 3; 5; 1; 4; 6; 2; 4 |] in
+  (fun t ->
+    let y = if t.month < Month.Mar then (year t) - 1 else (year t) in
+    Day_of_week.of_int
+    ((y + y / 4 - y / 100 + y / 400
+      + table.(Month.to_int t.month - 1)
+      + t.day) mod 7))
+
+let rata_die t =
+  let (y, m) =
+    if t.month < Mar
+      then t.year - 1, Month.to_int t.month + 12
+      else t.year, Month.to_int t.month in
+  365 * y + y / 4 - y / 100 + y / 400 + (153 * m - 457) / 5 + t.day - 306
+
+let diff a b = rata_die a - rata_die b
+
+(* Tests *)
+
+let test_leap () =
+  List.for_all (fun a -> a) [
+    not (leap 1900);
+    leap 1904;
+    not (leap 1917);
+    leap 1964;
+    leap 2000;
+    leap 2016;
+    leap 2072;
+    not (leap 2100);
+  ]
+
+let test_day_of_week () =
+  let mk day month year = create ~day ~month year in
+  List.for_all (fun a -> a) [
+    day_of_week (mk 11 Jul 2016) = Mon;
+    day_of_week (mk 1 Oct 1993) = Fri;
+    day_of_week (mk 27 Mar 1827) = Tue;
+    day_of_week (mk 31 Dec 2412) = Mon;
+    day_of_week (mk 1 Mar 2000) = Wed;
+  ]
+
+let test_diff () =
+  let mk day month year = create ~day ~month year in
+  List.for_all (fun a -> a) [
+    diff (mk 2 Jul 1993) (mk 2 Jul 1993) = 0;
+    diff (mk 23 Dec 2001) (mk 22 Dec 2001) = 1;
+    diff (mk 6 Aug 1943) (mk 2 Jan 2200) = 0 - 93_652;
+    diff (mk 31 Mar 2014) (mk 11 Dec 2013) = 110;
+    diff (mk 15 Jun 3065) (mk 1 Jan 2016) = 383_305;
+  ]
+
+let tests = [
+    "Time.leap", test_leap;
+    "Time.day_of_week", test_day_of_week;
+    "Time.diff", test_diff
+  ]
