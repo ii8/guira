@@ -1,40 +1,27 @@
-module Date = Core.Std.Date
-module Month = Core.Std.Month
-module Day_of_week = Core.Std.Day_of_week
 open Syntax
 
 type state = {
-  d : Date.t;
-  r : Date.t;
+  d : Time.t;
+  r : Time.t;
   i : interval;
 }
-
-let week_start d =
-  Date.day_of_week d
-  |> Day_of_week.iso_8601_weekday_number
-  |> (fun a -> 1 - a)
-  |> Date.add_days d
-
-let month_start d = Date.create_exn ~y:(Date.year d) ~m:(Date.month d) ~d:1
-
-let year_start d = Date.create_exn ~y:(Date.year d) ~m:Month.Jan ~d:1
 
 let eval i s expression =
   let first = match s.i with
     | Days -> assert false
-    | Weeks -> week_start s.d
-    | Months -> month_start s.d
-    | Years -> year_start s.d
+    | Weeks -> Time.this_monday s.d
+    | Months -> Time.create ~month:(Time.month s.d) (Time.year s.d)
+    | Years -> Time.create (Time.year s.d)
     | Eternity -> s.r in
   let n = match i with
-    | Days -> Date.diff s.d first + 1
+    | Days -> Time.diff s.d first + 1
     | Weeks ->
-      let a = (Date.diff s.d first + 1) mod 7 in
-      (Date.diff s.d first + a) / 7
+      let a = (Time.diff s.d first + 1) mod 7 in
+      (Time.diff s.d first + a) / 7
     | Months ->
-      let m a = Date.month a |> Month.to_int in
-      (m s.d - (m first - 1)) + (Date.year s.d - Date.year first) * 12
-    | Years -> Date.year s.d - Date.year first
+      let m a = Time.month a |> Time.Month.to_int in
+      (m s.d - (m first - 1)) + (Time.year s.d - Time.year first) * 12
+    | Years -> Time.year s.d - Time.year first
     | Eternity -> assert false in
 
   let rec ev = function
@@ -57,15 +44,15 @@ let filter_any i f s = function
   | _ -> assert false
 
 let rec filter_days s = function
-  | Opt (Weekday day) -> day = Date.day_of_week s.d
+  | Opt (Weekday day) -> day = Time.day_of_week s.d
   | a -> filter_any Days filter_days s a
 
 let rec filter_months s = function
-  | Opt (Mensis m) -> m = Date.month s.d
+  | Opt (Mensis m) -> m = Time.month s.d
   | a -> filter_any Months filter_months s a
 
 let rec filter_years s = function
-  | Opt (Annus y) -> y = Date.year s.d
+  | Opt (Annus y) -> y = Time.year s.d
   | a -> filter_any Years filter_years s a
 
 let filter selector d r =

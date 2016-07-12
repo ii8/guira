@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: c90760083a2b1b1282a1581477ab0eeb)
+# DO NOT EDIT (digest: 5ff9a7d4bab700ddb1c0893700413374)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -17,9 +17,10 @@ true: annot, bin_annot
 # Library guira
 "guira.cmxs": use_guira
 # Executable guira
-"main.native": pkg_core
-"main.native": pkg_threads
-<*.ml{,i,y}>: pkg_core
-<*.ml{,i,y}>: pkg_threads
+"main.native": pkg_unix
 # Executable test
+"test.byte": oasis_executable_test_native
+<*.ml{,i,y}>: oasis_executable_test_native
+"test.byte": pkg_unix
+<*.ml{,i,y}>: pkg_unix
 # OASIS_STOP

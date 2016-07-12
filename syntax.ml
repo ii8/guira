@@ -1,6 +1,6 @@
 open Sexp
-module M = Core.Std.Month
-module W = Core.Std.Day_of_week
+module M = Time.Month
+module W = Time.Day_of_week
 
 exception Syntax of string
 
@@ -57,7 +57,7 @@ let bexp_of_sexp = function
   | sexp -> Equal_to_n (exp_of_sexp sexp)
 
 type dayopt =
-  | Weekday of Core.Std.Day_of_week.t
+  | Weekday of Time.Day_of_week.t
 
 let dayopt_of_sexp = function
   | Atom s -> Weekday begin match s with
@@ -73,7 +73,7 @@ let dayopt_of_sexp = function
   | _ -> err ()
 
 type monthopt =
-  | Mensis of Core.Std.Month.t
+  | Mensis of Time.Month.t
 
 let monthopt_of_sexp = function
   | Atom m ->

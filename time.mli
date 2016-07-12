@@ -40,7 +40,18 @@ val hour : t -> int
 val minute : t -> int
 val second : t -> int
 
+val create : ?second:int -> ?minute:int -> ?hour:int ->
+             ?day:int -> ?month:Month.t -> int -> t
+val now : unit -> t
+
+val of_string : string -> t
+val to_string : t -> string
+val format : t -> string -> string
+
 val next : t -> interval -> t
 val diff : t -> t -> int
+
+val day_of_week : t -> Day_of_week.t
+val this_monday : t -> t
 
 val tests : (string * (unit -> bool)) list

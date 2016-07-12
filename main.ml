@@ -1,14 +1,11 @@
 open Sexp
-open Core.Std
-
-type interval = Day | Week | Month | Year
 
 type options = {
-  mutable date : Date.t option;
-  mutable start : Date.t;
-  mutable last : Date.t;
+  mutable date : Time.t option;
+  mutable start : Time.t;
+  mutable last : Time.t;
   mutable fmt : string;
-  mutable interval : interval;
+  mutable interval : Time.interval;
   mutable help : bool
 }
 
@@ -31,20 +28,13 @@ let usage () = print_endline "\
 let list_dates sdate edate selector fmt interval =
   let check d =
     if Filter.filter selector d sdate
-      then print_endline (Date.format d fmt) in
+      then print_endline (Time.format d fmt) in
 
   let rec loop d =
     if edate >= d
       then begin
         check d;
-        loop begin
-          try match interval with
-            | Day -> Date.add_days d 1
-            | Week -> Date.add_days d 7
-            | Month -> Date.add_months d 1
-            | Year -> Date.add_months d 12
-          with _ -> exit 0
-        end
+        loop (Time.next d interval)
       end in
 
   loop sdate
@@ -64,16 +54,16 @@ let run o =
 
 let () =
   let get_date opt =
-    try Date.of_string opt with
+    try Time.of_string opt with
       | _ ->
         prerr_endline ("Error: invalid date string '" ^ opt ^ "'"); exit 2 in
 
   let o = {
     date = None;
-    start = Date.today ~zone:Core.Zone.local;
-    last = Date.create_exn ~y:9999 ~m:Month.Dec ~d:31;
+    start = Time.now ();
+    last = Time.create ~day:31 ~month:Time.Month.Dec 9999;
     fmt = "%F";
-    interval = Day;
+    interval = Time.Days;
     help = false;
   } in
 
@@ -90,23 +80,23 @@ let () =
   let set_fmt opt = o.fmt <- opt in
   let set_interval opt =
     o.interval <- match opt with
-      | "day" -> Day
-      | "week" -> Week
-      | "month" -> Month
-      | "year" -> Year
+      | "day" -> Time.Days
+      | "week" -> Time.Weeks
+      | "month" -> Time.Months
+      | "year" -> Time.Years
       | _ ->
         prerr_endline ("Error: invalid interval '" ^ opt ^ "'");
         exit 2 in
 
-  ignore @@ Array.map ~f:(fun opt ->
+  ignore @@ Array.map (fun opt ->
     match opt with
       | "-s" | "--start-date" -> current := set_start
       | "-e" | "--end-date" -> current := set_end
       | "-f" | "--format" -> current := set_fmt
       | "-i" | "--interval" -> current := set_interval
       | "-h" | "--help" -> o.help <- true
-      | _ -> begin match String.to_list opt with
-        | '-' :: _ -> noop opt
+      | _ -> begin match String.get opt 0 with
+        | '-' -> noop opt
         | _ -> !current opt; current := set_date
       end
   ) Sys.argv;

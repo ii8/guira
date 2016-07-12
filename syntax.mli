@@ -16,10 +16,10 @@ type bexp =
   | Greater_than of exp * exp
 
 type dayopt =
-  | Weekday of Core.Std.Day_of_week.t
+  | Weekday of Time.Day_of_week.t
 
 type monthopt =
-  | Mensis of Core.Std.Month.t
+  | Mensis of Time.Month.t
 
 type yearopt =
   | Annus of int

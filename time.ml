@@ -80,6 +80,36 @@ let create ?second:(second = 0) ?minute:(minute = 0) ?hour:(hour = 0)
            ?day:(day = 1) ?month:(month = Month.Jan) year =
   { year; month; day; hour; minute; second }
 
+let now () = Unix.time () |> Unix.gmtime |> fun tm -> create
+  ~second:tm.Unix.tm_sec
+  ~minute:tm.Unix.tm_min
+  ~hour:tm.Unix.tm_hour
+  ~day:tm.Unix.tm_mday
+  ~month:(Month.of_int (tm.Unix.tm_mon + 1))
+  (tm.Unix.tm_year + 1900)
+
+let valid t =
+  if t.year < 0 then failwith "year cannot be less than 0";
+  if t.day < 1 then failwith "day must be positive";
+  if t.day > days_in_month t.year t.month then failwith "day too great";
+  t
+
+let of_string s =
+  let year = int_of_string (String.sub s 0 4) in
+  let mint = int_of_string (String.sub s 5 2) in
+  let month =
+    if mint > 12 || mint < 1
+      then failwith "month must be between 1 and 12"
+      else Month.of_int mint in
+  let day = int_of_string (String.sub s 8 2) in
+  create ~day ~month year |> valid
+
+let to_string t =
+  Printf.sprintf "%04u-%02u-%02u" t.year (Month.to_int t.month) t.day
+
+let format t fmt =
+  to_string t
+
 let rec next date interval =
   let add_days i =
     let num_days = days_in_month date.year date.month in
@@ -167,6 +197,9 @@ let test_leap () =
     not (leap 2100);
   ]
 
+let test_now () =
+  diff (now ()) (create 2016) > 0
+
 let test_next () =
   let c = create in
   let last_day = c ~second:59 ~minute:59 ~hour:23 ~day:31 ~month:Dec 1999 in
@@ -209,6 +242,7 @@ let test_this_monday () =
 
 let tests = [
     "Time.leap", test_leap;
+    "Time.now", test_now;
     "Time.next", test_next;
     "Time.day_of_week", test_day_of_week;
     "Time.diff", test_diff;

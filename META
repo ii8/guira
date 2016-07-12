@@ -1,8 +1,8 @@
 # OASIS_START
-# DO NOT EDIT (digest: c9f15319c34ebdcb5eaf8790bd24f9e5)
+# DO NOT EDIT (digest: 5250dae11b8f5f2523a570f96c5394ad)
 version = "0.1.0"
 description = "s-expression language to query dates"
-requires = "core threads"
+requires = "unix"
 archive(byte) = "guira.cma"
 archive(byte, plugin) = "guira.cma"
 archive(native) = "guira.cmxa"

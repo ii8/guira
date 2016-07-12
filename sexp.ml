@@ -12,7 +12,7 @@ let atom cs =
   let len = List.length cs in
   let res = Bytes.create len in
   let rec imp i = function
-    | [] -> res
+    | [] -> Bytes.to_string res
     | c :: cs -> Bytes.set res i c; imp (i - 1) cs in
   Atom (imp (len - 1) cs)
 

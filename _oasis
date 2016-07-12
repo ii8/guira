@@ -10,7 +10,7 @@ Library guira
   Install:         true
   Path:            .
   BuildTools:      ocamlbuild
-  BuildDepends:    core, threads
+  BuildDepends:    unix
   Modules:         Guira
   InternalModules: Syntax, Filter, Sexp
 
@@ -18,7 +18,7 @@ Executable guira
   Install:         true
   Path:            .
   BuildTools:      ocamlbuild
-  BuildDepends:    core, threads
+  BuildDepends:    unix
   MainIs:          main.ml
   CompiledObject:  native
 
@@ -26,8 +26,11 @@ Executable test
   Install:         false
   Path:            .
   BuildTools:      ocamlbuild
+  BuildDepends:    unix
   Build$:          flag(tests)
   MainIs:          test.ml
+  NativeOpt:       -safe-string
+  ByteOpt:         -safe-string
 
 Test unit
   Run$:            flag(tests)
