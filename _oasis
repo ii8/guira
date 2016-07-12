@@ -37,6 +37,11 @@ Test unit
   Command:         $test
   TestTools:       test
 
+Test functional
+  Run$:            flag(tests)
+  Command:         ./test.scm $guira
+  TestTools:       guira
+
 SourceRepository github
   Type:            git
   Location:        https://github.com/sir-murray/guira.git
