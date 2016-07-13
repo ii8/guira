@@ -2,8 +2,6 @@ open Sexp
 
 exception Syntax of string
 
-type interval = Days | Weeks | Months | Years | Eternity
-
 type exp =
   | Variable
   | Constant of int

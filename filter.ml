@@ -1,4 +1,5 @@
 open Syntax
+open Time
 
 type state = {
   d : Time.t;
@@ -9,19 +10,19 @@ type state = {
 let eval i s expression =
   let first = match s.i with
     | Days -> assert false
-    | Weeks -> Time.this_monday s.d
-    | Months -> Time.create ~month:(Time.month s.d) (Time.year s.d)
-    | Years -> Time.create (Time.year s.d)
+    | Weeks -> this_monday s.d
+    | Months -> create ~month:(month s.d) (year s.d)
+    | Years -> create (year s.d)
     | Eternity -> s.r in
   let n = match i with
-    | Days -> Time.diff s.d first + 1
+    | Days -> diff s.d first + 1
     | Weeks ->
-      let a = (Time.diff s.d first + 1) mod 7 in
-      (Time.diff s.d first + a) / 7
+      let a = (diff s.d first + 1) mod 7 in
+      (diff s.d first + a) / 7
     | Months ->
-      let m a = Time.month a |> Time.Month.to_int in
-      (m s.d - (m first - 1)) + (Time.year s.d - Time.year first) * 12
-    | Years -> Time.year s.d - Time.year first
+      let m a = month a |> Month.to_int in
+      (m s.d - (m first - 1)) + (year s.d - year first) * 12
+    | Years -> year s.d - year first
     | Eternity -> assert false in
 
   let rec ev = function
@@ -44,15 +45,15 @@ let filter_any i f s = function
   | _ -> assert false
 
 let rec filter_days s = function
-  | Opt (Weekday day) -> day = Time.day_of_week s.d
+  | Opt (Weekday day) -> day = day_of_week s.d
   | a -> filter_any Days filter_days s a
 
 let rec filter_months s = function
-  | Opt (Mensis m) -> m = Time.month s.d
+  | Opt (Mensis m) -> m = month s.d
   | a -> filter_any Months filter_months s a
 
 let rec filter_years s = function
-  | Opt (Annus y) -> y = Time.year s.d
+  | Opt (Annus y) -> y = year s.d
   | a -> filter_any Years filter_years s a
 
 let filter selector d r =

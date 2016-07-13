@@ -1,10 +1,9 @@
 open Sexp
+open Time
 module M = Time.Month
 module W = Time.Day_of_week
 
 exception Syntax of string
-
-type interval = Days | Weeks | Months | Years | Eternity
 
 let err ?e () =
   let s = match e with None -> "invalid expression" | Some a -> a in
@@ -57,7 +56,7 @@ let bexp_of_sexp = function
   | sexp -> Equal_to_n (exp_of_sexp sexp)
 
 type dayopt =
-  | Weekday of Time.Day_of_week.t
+  | Weekday of Day_of_week.t
 
 let dayopt_of_sexp = function
   | Atom s -> Weekday begin match s with
@@ -73,7 +72,7 @@ let dayopt_of_sexp = function
   | _ -> err ()
 
 type monthopt =
-  | Mensis of Time.Month.t
+  | Mensis of Month.t
 
 let monthopt_of_sexp = function
   | Atom m ->
