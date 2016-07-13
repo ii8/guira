@@ -4,3 +4,4 @@ setup.log
 *.native
 *.byte
 *.swp
+*.js

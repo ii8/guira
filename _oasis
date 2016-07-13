@@ -6,6 +6,10 @@ Authors:     Murray <murray.calavera@gmail.com>
 License:     PD
 Plugins:     META (0.4), DevFiles (0.4)
 
+Flag js
+  Description:     Create javascript library
+  Default:         true
+
 Library guira
   Install:         true
   Path:            .
@@ -21,6 +25,15 @@ Executable guira
   BuildDepends:    unix
   MainIs:          main.ml
   CompiledObject:  native
+
+Executable jsbyte
+  Install:         false
+  Path:            .
+  BuildTools:      ocamlbuild
+  BuildDepends:    unix, js_of_ocaml, js_of_ocaml.ppx
+  Build$:          flag(js)
+  MainIs:          javascript.ml
+  CompiledObject:  byte
 
 Executable test
   Install:         false

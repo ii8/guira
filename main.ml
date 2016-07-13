@@ -1,4 +1,3 @@
-open Sexp
 
 type options = {
   mutable date : Time.t option;
@@ -40,7 +39,7 @@ let list_dates sdate edate selector fmt interval =
   loop sdate
 
 let run o =
-  let selector = try parse () |> Syntax.selector_of_sexp with
+  let selector = try Sexp.parse_stdin () |> Syntax.selector_of_sexp with
     | a -> begin match a with
       | Syntax.Syntax e -> prerr_endline ("Error: " ^ e)
       | Failure "int_of_string" -> prerr_endline "Error: bad integer"

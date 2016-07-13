@@ -16,8 +16,7 @@ let atom cs =
     | c :: cs -> Bytes.set res i c; imp (i - 1) cs in
   Atom (imp (len - 1) cs)
 
-let parse () =
-  let next () = try Some (input_char stdin) with End_of_file -> None in
+let parse next =
   let rec r state = match next () with
     | None -> failwith "unexpected eof"
     | Some c -> match state with
@@ -52,8 +51,38 @@ let parse () =
       end in
   r In_start
 
-let prerr exp =
+let prerr_sexp exp =
   let rec p = function
     | Atom s -> s
     | List e -> "(" ^ (String.concat " " (List.map p e)) ^ ")" in
   prerr_endline(p exp)
+
+let parse_stdin () =
+  let next () = try Some (input_char stdin) with End_of_file -> None in
+  parse next
+
+let parse_string s =
+  let l = String.length s in
+  let i = ref (-1) in
+  parse begin fun () ->
+    i := !i + 1;
+    if l > !i
+      then Some (String.get s !i)
+      else None
+  end
+
+(* Tests *)
+
+let test_parse_string () =
+  List.for_all (fun a -> a) [
+    parse_string "(day)" = List [ Atom "day" ];
+    parse_string "(month jul (day (nth 2)))" =
+      List [
+        Atom "month";
+        Atom "jul";
+        List [Atom "day"; List [Atom "nth"; Atom "2"] ] ];
+  ]
+
+let tests = [
+    "Sexp.parse_string", test_parse_string;
+  ]

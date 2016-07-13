@@ -11,6 +11,7 @@ let () =
 
   prerr_newline ();
   prerr_endline "|| Starting unit tests ||";
+  List.iter test Sexp.tests;
   List.iter test Time.tests;
   prerr_newline ();
   if !pass
