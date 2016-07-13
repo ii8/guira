@@ -8,47 +8,70 @@
 (define green "\x1B;[92m")
 (define end "\x1B;[0m")
 
-(define (test check-type desc input expect)
+(define (wexitstatus status)
+  (case status
+    ((0) 0)
+    ((256) 1)
+    ((512) 2)
+    (else status)))
+
+(define (make-test check-type desc input expect)
   (lambda (pid in out err)
     (write-string input in)
     (close-output-port in)
     (let ((ret-out (port->string-list out))
-           (ret-err (port->string err))
-           (ret-code (cadr (waitpid pid 0))))
+          (ret-err (port->string err))
+          (ret-code (wexitstatus (cadr (waitpid pid 0)))))
       (if
         (case check-type
           ((1) (= ret-code expect))
           ((2) (equal? ret-out expect)))
         (begin
           (display green)
+          (display "Passed: ")
           (display desc)
-          (display ": Passed")
           (display end)
           (newline))
         (begin
           (display
             (string-append
-              red desc ": Failed\n"
-              "\tstdin: " input
+              red "Failed: " desc
+              "\n\tstdin: " input
               "\n\tstderr: " ret-err
-              "\n\treturn code: " (number->string ret-code)
+              "\n\texit code: " (number->string ret-code)
               end "\n"))
           (set! ret 1))))))
 
-(define tests (list
-  (cons
-    "-s 1992-04-04 1992-04-06"
-    (test 1 "Simple nth day" "(day (nth 3))" 0))
+(define (test desc type args input expect)
+  (cons args (make-test type desc input expect)))
 
-  (cons
+(define tests (list
+  (test "Nth day" 1
+    "-s 1992-04-04 1992-04-06"
+    "(day (nth 3))"
+    0)
+
+  (test "Or condition" 2
+    "-s 2016-07-03 -e 2016-07-09"
+    "(day (or wed fri))"
+    (list "2016-07-06" "2016-07-08"))
+
+  (test "Not condition" 1
+    "2016-07-04"
+    "(day (not mon))"
+    1)
+
+  (test "Comments" 1
+    "2000-01-01"
+    "(day ; comment\n)"
+    0)
+
+  (test "Complex subselectors" 2
     "-s 2000-01-01"
-    (test 2 "Complex subselectors"
-      "(year 2016
-        (month (or jul (nth 8)) (day mon))
-        (month dec (day (nth 2))))"
-      (list
-        "2016-07-04" "2016-07-11" "2016-07-18" "2016-07-25" "2016-08-01"
-        "2016-08-08" "2016-08-15" "2016-08-22" "2016-08-29" "2016-12-02")))
+    "(year 2016 (month (or jul (nth 8)) (day mon)) (month dec (day (nth 2))))"
+    (list
+      "2016-07-04" "2016-07-11" "2016-07-18" "2016-07-25" "2016-08-01"
+      "2016-08-08" "2016-08-15" "2016-08-22" "2016-08-29" "2016-12-02"))
   ))
 
 (newline)
