@@ -26,6 +26,18 @@ module Month = struct
     | May -> 5  | Jun -> 6  | Jul -> 7  | Aug -> 8
     | Sep -> 9  | Oct -> 10 | Nov -> 11 | Dec -> 12
 
+  let of_string = function
+    | "jan" -> Some Jan | "feb" -> Some Feb | "mar" -> Some Mar
+    | "apr" -> Some Apr | "may" -> Some May | "jun" -> Some Jun
+    | "jul" -> Some Jul | "aug" -> Some Aug | "sep" -> Some Sep
+    | "oct" -> Some Oct | "nov" -> Some Nov | "dec" -> Some Dec
+    | _ -> None
+
+  let to_string = function
+    | Jan -> "jan" | Feb -> "feb" | Mar -> "mar" | Apr -> "apr"
+    | May -> "may" | Jun -> "jun" | Jul -> "jul" | Aug -> "aug"
+    | Sep -> "sep" | Oct -> "oct" | Nov -> "nov" | Dec -> "dec"
+
   let next m = let n = to_int m + 1 in of_int n
   let last m = let n = to_int m - 1 in of_int n
 end
@@ -48,6 +60,15 @@ module Day_of_week = struct
   let to_int = function
     | Mon -> 1 | Tue -> 2 | Wed -> 3 | Thu -> 4
     | Fri -> 5 | Sat -> 6 | Sun -> 7
+
+  let of_string = function
+    | "mon" -> Some Mon | "tue" -> Some Tue | "wed" -> Some Wed
+    | "thu" -> Some Thu | "fri" -> Some Fri | "sat" -> Some Sat
+    | "sun" -> Some Sun | _ -> None
+
+  let to_string = function
+    | Mon -> "mon" | Tue -> "tue" | Wed -> "wed" | Thu -> "thu"
+    | Fri -> "fri" | Sat -> "sat" | Sun -> "sun"
 end
 open Day_of_week
 
@@ -93,22 +114,6 @@ let valid t =
   if t.day < 1 then failwith "day must be positive";
   if t.day > days_in_month t.year t.month then failwith "day too great";
   t
-
-let of_string s =
-  let year = int_of_string (String.sub s 0 4) in
-  let mint = int_of_string (String.sub s 5 2) in
-  let month =
-    if mint > 12 || mint < 1
-      then failwith "month must be between 1 and 12"
-      else Month.of_int mint in
-  let day = int_of_string (String.sub s 8 2) in
-  create ~day ~month year |> valid
-
-let to_string t =
-  Printf.sprintf "%04u-%02u-%02u" t.year (Month.to_int t.month) t.day
-
-let format t fmt =
-  to_string t
 
 let rec next date interval =
   let add_days i =
@@ -182,6 +187,42 @@ let this_monday t =
         month = new_month;
         day = days_in_month t.year new_month + i }
     else { t with day = i }
+
+let of_string s =
+  let year = int_of_string (String.sub s 0 4) in
+  let mint = int_of_string (String.sub s 5 2) in
+  let month =
+    if mint > 12 || mint < 1
+      then failwith "month must be between 1 and 12"
+      else Month.of_int mint in
+  let day = int_of_string (String.sub s 8 2) in
+  create ~day ~month year |> valid
+
+let to_string t =
+  Printf.sprintf "%04u-%02u-%02u" t.year (Month.to_int t.month) t.day
+
+let format t fmt =
+  let res = ref [] in
+  let a s = res := s :: !res in
+  let on = ref false in
+
+  let add0 i = a (if i < 10 then "0" ^ string_of_int i else string_of_int i) in
+  String.iter begin fun c ->
+    if !on
+      then begin on := false; match c with
+        | 'a' -> a (Day_of_week.to_string (day_of_week t))
+        | 'b' -> a (Month.to_string t.month)
+        | 'd' -> add0 t.day
+        | 'F' -> a (to_string t)
+        | 'm' -> add0 (Month.to_int t.month)
+        | 'Y' -> a (string_of_int t.year)
+        | '%' -> a "%"
+        | _ -> a ("%" ^ String.make 1 c)
+      end else match c with
+        | '%' -> on := true
+        | _ -> a (String.make 1 c)
+  end fmt;
+  String.concat "" (List.rev !res)
 
 (* Tests *)
 

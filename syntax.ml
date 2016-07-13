@@ -59,15 +59,9 @@ type dayopt =
   | Weekday of Day_of_week.t
 
 let dayopt_of_sexp = function
-  | Atom s -> Weekday begin match s with
-    | "mon" -> W.Mon
-    | "tue" -> W.Tue
-    | "wed" -> W.Wed
-    | "thu" -> W.Thu
-    | "fri" -> W.Fri
-    | "sat" -> W.Sat
-    | "sun" -> W.Sun
-    | s -> expect ["a weekday"] s
+  | Atom s -> begin match Day_of_week.of_string s with
+    | Some day -> Weekday day
+    | None -> expect ["a weekday"] s
   end
   | _ -> err ()
 
@@ -75,12 +69,9 @@ type monthopt =
   | Mensis of Month.t
 
 let monthopt_of_sexp = function
-  | Atom m ->
-    Mensis begin match m with
-      | "jan" -> M.Jan | "feb" -> M.Feb | "mar" -> M.Mar | "apr" -> M.Apr
-      | "may" -> M.May | "jun" -> M.Jun | "jul" -> M.Jul | "aug" -> M.Aug
-      | "sep" -> M.Sep | "oct" -> M.Oct | "nov" -> M.Nov | "dec" -> M.Dec
-      | s -> expect ["a month"] s
+  | Atom s -> begin match Month.of_string s with
+      | Some day -> Mensis day
+      | None -> expect ["a month"] s
     end
   | _ -> err ()
 

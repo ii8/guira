@@ -17,6 +17,8 @@ module Month : sig
     | Jul | Aug | Sep | Oct | Nov | Dec
   val of_int : int -> t
   val to_int : t -> int
+  val of_string : string -> t option
+  val to_string : t -> string
   val next : t -> t
 end
 
@@ -31,6 +33,8 @@ module Day_of_week : sig
     | Sun
   val of_int : int -> t
   val to_int : t -> int
+  val of_string : string -> t option
+  val to_string : t -> string
 end
 
 val year : t -> int
