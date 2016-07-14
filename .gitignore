@@ -1,7 +1,9 @@
-_build
-setup.data
-setup.log
+guira
 *.native
 *.byte
 *.swp
 *.js
+*.cmi
+*.cmo
+*.cmx
+*.o

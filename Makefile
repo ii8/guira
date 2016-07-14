@@ -1,41 +1,49 @@
-# OASIS_START
-# DO NOT EDIT (digest: a3c674b4239234cbbe53afe090018954)
 
-SETUP = ocaml setup.ml
+PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
 
-build: setup.data
-	$(SETUP) -build $(BUILDFLAGS)
+OCAMLC = ocamlfind ocamlc -safe-string -w +A-4
+OCAMLOPT = ocamlfind ocamlopt -safe-string -w +A-4
+JS_OF_OCAML = js_of_ocaml
 
-doc: setup.data build
-	$(SETUP) -doc $(DOCFLAGS)
+OBJS = sexp.cmx time.cmx syntax.cmx filter.cmx
 
-test: setup.data build
-	$(SETUP) -test $(TESTFLAGS)
 
-all:
-	$(SETUP) -all $(ALLFLAGS)
+guira: $(OBJS)
+	$(OCAMLOPT) -linkpkg -package unix $^ main.ml -o $@
 
-install: setup.data
-	$(SETUP) -install $(INSTALLFLAGS)
+install: guira
+	install guira $(BINDIR)/guira
 
-uninstall: setup.data
-	$(SETUP) -uninstall $(UNINSTALLFLAGS)
+uninstall:
+	rm -f $(BINDIR)/guira
 
-reinstall: setup.data
-	$(SETUP) -reinstall $(REINSTALLFLAGS)
+js: js.byte
+	$(JS_OF_OCAML) $^ -o guira.js
+
+test: guira test.byte
+	./test.byte
+	./test.scm ./guira
 
 clean:
-	$(SETUP) -clean $(CLEANFLAGS)
+	rm -f *.cm[iox] *.o
+	rm -f guira js.byte test.byte guira.js
 
-distclean:
-	$(SETUP) -distclean $(DISTCLEANFLAGS)
 
-setup.data:
-	$(SETUP) -configure $(CONFIGUREFLAGS)
+js.byte: $(OBJS:cmx=cmo)
+	$(OCAMLC) -linkpkg -package js_of_ocaml,unix $^ javascript.ml -o $@
 
-configure:
-	$(SETUP) -configure $(CONFIGUREFLAGS)
+test.byte: $(OBJS:cmx=cmo)
+	$(OCAMLC) -linkpkg -package unix $^ test.ml -o $@
 
-.PHONY: build doc test all install uninstall reinstall clean distclean configure
+%.cmx: %.ml %.cmi
+	$(OCAMLOPT) -c $<
 
-# OASIS_STOP
+%.cmo: %.ml %.cmi
+	$(OCAMLC) -c $<
+
+%.cmi: %.mli
+	$(OCAMLC) -c $<
+
+.PRECIOUS: $(OBJS:cmx=cmi)
+.PHONY: clean install uninstall test
