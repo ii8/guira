@@ -1,9 +1,0 @@
-guira
-*.native
-*.byte
-*.swp
-*.js
-*.cmi
-*.cmo
-*.cmx
-*.o
