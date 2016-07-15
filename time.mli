@@ -54,6 +54,7 @@ val format : t -> string -> string
 
 val next : t -> interval -> t
 val diff : t -> t -> int
+val leap : int -> bool
 
 val day_of_week : t -> Day_of_week.t
 val this_monday : t -> t

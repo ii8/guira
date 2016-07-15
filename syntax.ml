@@ -79,8 +79,10 @@ let monthopt_of_sexp = function
 
 type yearopt =
   | Annus of int
+  | Leap
 
 let yearopt_of_sexp = function
+  | Atom "leap" -> Leap
   | Atom s -> Annus (int_of_string s)
   | _ -> err ()
 

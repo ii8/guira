@@ -71,6 +71,7 @@ let rec filter_months s = function
   | a -> filter_any Months filter_months s a
 
 let rec filter_years s = function
+  | Opt Leap -> leap (year s.d)
   | Opt (Annus y) -> y = year s.d
   | a -> filter_any Years filter_years s a
 

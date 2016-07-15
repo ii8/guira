@@ -21,6 +21,7 @@ type monthopt =
 
 type yearopt =
   | Annus of int
+  | Leap
 
 type 'a anyopt =
   | All
