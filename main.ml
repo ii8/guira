@@ -29,14 +29,16 @@ let list_dates sdate edate selector fmt interval =
     if Filter.filter selector d sdate
       then print_endline (Time.format d fmt) in
 
+  let rs = Time.tfloor sdate interval in
+  let re = Time.tfloor edate interval in
   let rec loop d =
-    if edate >= d
+    if re >= d
       then begin
         check d;
         loop (Time.next d interval)
       end in
 
-  loop sdate
+  loop rs
 
 let run o =
   let selector = try Sexp.parse_stdin () |> Syntax.selector_of_sexp with

@@ -155,7 +155,7 @@ let rec next date interval =
          && date.year + 1 |> leap |> not
         then { date with year = date.year + 1; day = 28 }
         else { date with year = date.year + 1 }
-    | Eternity -> assert false
+    | Eternity -> create ~second:59 ~minute:59 ~hour:23 ~day:31 ~month:Dec 9999
 
 let day_of_week =
   let table = [| 0; 3; 2; 5; 0; 3; 5; 1; 4; 6; 2; 4 |] in
@@ -187,6 +187,16 @@ let this_monday t =
         month = new_month;
         day = days_in_month t.year new_month + i }
     else { t with day = i }
+
+let tfloor t ?eternity:(e = create 0) = function
+  | Seconds -> t
+  | Minutes -> { t with second = 0 }
+  | Hours -> { t with second = 0; minute = 0 }
+  | Days -> { t with second = 0; minute = 0; hour = 0 }
+  | Weeks -> let u = this_monday t in create ~day:u.day ~month:u.month u.year
+  | Months -> create ~month:t.month t.year
+  | Years -> create t.year
+  | Eternity -> e
 
 let of_string s =
   let year = int_of_string (String.sub s 0 4) in

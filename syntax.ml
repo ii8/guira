@@ -1,7 +1,5 @@
 open Sexp
 open Time
-module M = Time.Month
-module W = Time.Day_of_week
 
 exception Syntax of string
 
@@ -24,11 +22,13 @@ type exp =
   | Modulo of exp * exp
   | Sum of exp list
 
+(* Currently unused
 let rec sexp_of_exp = function
   | Variable -> Atom "n"
   | Constant i -> Atom (string_of_int i)
   | Modulo (a, b) -> List [Atom "mod"; sexp_of_exp a; sexp_of_exp b]
   | Sum a -> List (Atom "+" :: List.map sexp_of_exp a)
+*)
 
 let rec exp_of_sexp = function
   | Atom "n" -> Variable
@@ -44,10 +44,12 @@ type bexp =
   | Equal_to of exp * exp
   | Greater_than of exp * exp
 
+(* Currently unused
 let sexp_of_bexp = function
   | Equal_to_n exp -> sexp_of_exp exp
   | Equal_to (x, y) -> List [Atom "eq"; sexp_of_exp x; sexp_of_exp y]
   | Greater_than (x, y) -> List [Atom "gt"; sexp_of_exp x; sexp_of_exp y]
+*)
 
 let bexp_of_sexp = function
   | List (Atom "eq" :: x :: y :: []) -> Equal_to (exp_of_sexp x, exp_of_sexp y)
@@ -87,7 +89,7 @@ type 'a anyopt =
   | Not of 'a anyopt
   | Or of 'a anyopt list
   | And of 'a anyopt list
-  | Nth of bexp * selector option
+  | Nth of bexp * 'a anyopt option
   | Opt of 'a
 
 and selector =
@@ -101,6 +103,8 @@ let rec anyopt_of_sexp f = function
   | List (Atom "or" :: opts) -> Or (List.map (anyopt_of_sexp f) opts)
   | List (Atom "and" :: opts) -> And (List.map (anyopt_of_sexp f) opts)
   | List (Atom "nth" :: exp :: []) -> Nth (bexp_of_sexp exp, None)
+  | List (Atom "nth" :: exp :: opt :: []) ->
+    Nth (bexp_of_sexp exp, Some (anyopt_of_sexp f opt))
   | a -> Opt (f a)
 
 let selector_of_sexp sexp =

@@ -27,7 +27,7 @@ type 'a anyopt =
   | Not of 'a anyopt
   | Or of 'a anyopt list
   | And of 'a anyopt list
-  | Nth of bexp * selector option
+  | Nth of bexp * 'a anyopt option
   | Opt of 'a
 
 and selector =

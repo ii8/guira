@@ -9,8 +9,8 @@ JS_OF_OCAML = js_of_ocaml
 OBJS = sexp.cmx time.cmx syntax.cmx filter.cmx
 
 
-guira: $(OBJS)
-	$(OCAMLOPT) -linkpkg -package unix $^ main.ml -o $@
+guira: $(OBJS) main.ml
+	$(OCAMLOPT) -linkpkg -package unix $^ -o $@
 
 install: guira
 	install guira $(BINDIR)/guira
@@ -30,8 +30,8 @@ clean:
 	rm -f guira js.byte test.byte guira.js
 
 
-js.byte: $(OBJS:cmx=cmo)
-	$(OCAMLC) -linkpkg -package js_of_ocaml,unix $^ javascript.ml -o $@
+js.byte: $(OBJS:cmx=cmo) javascript.ml
+	$(OCAMLC) -linkpkg -package js_of_ocaml,unix $^ -o $@
 
 test.byte: $(OBJS:cmx=cmo)
 	$(OCAMLC) -linkpkg -package unix $^ test.ml -o $@

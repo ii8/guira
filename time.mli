@@ -57,5 +57,6 @@ val diff : t -> t -> int
 
 val day_of_week : t -> Day_of_week.t
 val this_monday : t -> t
+val tfloor : t -> ?eternity:t -> interval -> t
 
 val tests : (string * (unit -> bool)) list
