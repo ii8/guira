@@ -24,8 +24,8 @@ let eval_one i s expression =
   let n = match i with
     | Days -> diff s.d first + 1
     | Weeks ->
-      let a = (diff s.d first + 1) mod 7 in
-      (diff s.d first + a) / 7
+      let fw = first_week first in
+      (diff s.d fw + 7) / 7
     | Months ->
       let m a = month a |> Month.to_int in
       (m s.d - (m first - 1)) + (year s.d - year first) * 12
@@ -66,6 +66,8 @@ let rec filter_days s = function
   | Opt (Weekday day) -> day = day_of_week s.d
   | a -> filter_any Days filter_days s a
 
+let rec filter_weeks s opt = filter_any Weeks filter_weeks s opt
+
 let rec filter_months s = function
   | Opt (Mensis m) -> m = month s.d
   | a -> filter_any Months filter_months s a
@@ -80,6 +82,10 @@ let filter selector d r =
     | Day (opt, []) -> filter_days s opt
     | Day (opt, sub) -> if filter_days s opt
       then List.exists (f { s with i = Days }) sub
+      else false
+    | Week (opt, []) -> filter_weeks s opt
+    | Week (opt, sub) -> if filter_weeks s opt
+      then List.exists (f { s with i = Weeks }) sub
       else false
     | Month (opt, []) -> filter_months s opt
     | Month (opt, sub) -> if filter_months s opt

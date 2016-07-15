@@ -58,6 +58,7 @@ val leap : int -> bool
 
 val day_of_week : t -> Day_of_week.t
 val this_monday : t -> t
+val first_week : t -> t
 val tfloor : t -> ?eternity:t -> interval -> t
 
 val tests : (string * (unit -> bool)) list

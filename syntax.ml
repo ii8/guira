@@ -96,6 +96,7 @@ type 'a anyopt =
 
 and selector =
   | Day of dayopt anyopt * selector list
+  | Week of unit anyopt * selector list
   | Month of monthopt anyopt * selector list
   | Year of yearopt anyopt * selector list
 
@@ -110,7 +111,7 @@ let rec anyopt_of_sexp f = function
   | a -> Opt (f a)
 
 let selector_of_sexp sexp =
-  let selectors = ["day"; "month"; "year"] in
+  let selectors = ["day"; "week"; "month"; "year"] in
   let rec self old = function
     | List (Atom s :: rest) ->
       let split = begin match rest with
@@ -126,6 +127,10 @@ let selector_of_sexp sexp =
           if old <= Days
             then err ~e:"unexpected day selector" ()
             else Day (mk1 dayopt_of_sexp split, mk2 Days split)
+        | "week" ->
+          if old <= Weeks
+            then err ~e:"unexpected week selector" ()
+            else Week (mk1 (fun _ -> ()) split, mk2 Weeks split)
         | "month" ->
           if old <= Months
             then err ~e:"unexpected month selector" ()

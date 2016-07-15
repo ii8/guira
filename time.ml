@@ -198,6 +198,15 @@ let tfloor t ?eternity:(e = create 0) = function
   | Years -> create t.year
   | Eternity -> e
 
+let first_week t =
+  let rec loop u i = if i = 0 then u else loop (next u Days) (i - 1) in
+  day_of_week t
+  |> Day_of_week.to_int
+  |> (-) (Day_of_week.to_int Thu)
+  |> (fun d -> if d < 0 then d + 7 else d)
+  |> loop t
+  |> this_monday
+
 let of_string s =
   let year = int_of_string (String.sub s 0 4) in
   let mint = int_of_string (String.sub s 5 2) in
@@ -291,6 +300,15 @@ let test_this_monday () =
     this_monday (create ~day:2 2000) = (create ~day:27 ~month:Dec 1999);
   ]
 
+let test_first_week () =
+  let c d m y = create ~day:d ~month:m y in
+  List.for_all (fun a -> a) [
+    first_week (c 1 Jan 2017) = (c 2 Jan 2017);
+    first_week (c 1 Jan 2021) = (c 4 Jan 2021);
+    first_week (c 1 Nov 2021) = (c 1 Nov 2021);
+    first_week (c 1 Sep 2022) = (c 29 Aug 2022);
+  ]
+
 let tests = [
     "Time.leap", test_leap;
     "Time.now", test_now;
@@ -298,4 +316,5 @@ let tests = [
     "Time.day_of_week", test_day_of_week;
     "Time.diff", test_diff;
     "Time.this_monday", test_this_monday;
+    "Time.first_week", test_first_week;
   ]

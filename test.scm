@@ -83,6 +83,10 @@
     "(month (day (nth (gt n 2) mon)))"
     (list "1994-04-18" "1994-04-25"))
 
+  (test "Third even day of 2017" 2
+    "-s 2016-01-01"
+    "(year 2017 (day (nth 3 (nth (eq (mod n 2) 0)))))"
+    (list "2017-01-06"))
   ))
 
 (newline)

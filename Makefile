@@ -33,8 +33,8 @@ clean:
 js.byte: $(OBJS:cmx=cmo) javascript.ml
 	$(OCAMLC) -linkpkg -package js_of_ocaml,unix $^ -o $@
 
-test.byte: $(OBJS:cmx=cmo)
-	$(OCAMLC) -linkpkg -package unix $^ test.ml -o $@
+test.byte: $(OBJS:cmx=cmo) test.ml
+	$(OCAMLC) -linkpkg -package unix $^ -o $@
 
 %.cmx: %.ml %.cmi
 	$(OCAMLOPT) -c $<
@@ -42,8 +42,8 @@ test.byte: $(OBJS:cmx=cmo)
 %.cmo: %.ml %.cmi
 	$(OCAMLC) -c $<
 
-%.cmi: %.mli
-	$(OCAMLC) -c $<
+%.cmi: $(OBJS:cmx=mli)
+	$(OCAMLC) -c $(@:cmi=mli)
 
 .PRECIOUS: $(OBJS:cmx=cmi)
 .PHONY: clean install uninstall test

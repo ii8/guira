@@ -33,6 +33,7 @@ type 'a anyopt =
 
 and selector =
   | Day of dayopt anyopt * selector list
+  | Week of unit anyopt * selector list
   | Month of monthopt anyopt * selector list
   | Year of yearopt anyopt * selector list
 
