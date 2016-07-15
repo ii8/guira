@@ -90,3 +90,21 @@ let filter selector d r =
       then List.exists (f { s with i = Years }) sub
       else false
   in f { d; r; i = Eternity } selector
+
+
+(* Tests *)
+
+let test_eval () =
+  let mod3 = Equal_to (Modulo (Variable, Constant 3), Constant 0) in
+  List.for_all (fun a -> a) [
+    eval 1 (Equal_to_n Variable);
+    not (eval 5 mod3);
+    eval 6 mod3;
+    eval 13 (Equal_to_n (Sum [Constant 4; Constant 7; Constant 2]));
+    eval 4 (Greater_than (Variable, Constant 2));
+    not @@ eval 4 (Greater_than (Variable, Constant 4));
+  ]
+
+let tests = [
+    "Filter.eval", test_eval;
+  ]

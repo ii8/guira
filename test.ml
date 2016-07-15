@@ -13,6 +13,7 @@ let () =
   prerr_endline "|| Starting unit tests ||";
   List.iter test Sexp.tests;
   List.iter test Time.tests;
+  List.iter test Filter.tests;
   prerr_newline ();
   if !pass
     then prerr_endline (green ^ "All unit tests have passed" ^ stop)
