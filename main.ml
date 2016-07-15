@@ -26,7 +26,7 @@ let usage () = print_endline "\
 
 let list_dates sdate edate selector fmt interval =
   let check d =
-    if Filter.filter selector d sdate
+    if Filter.filter selector d sdate interval
       then print_endline (Time.format d fmt) in
 
   let rs = Time.tfloor sdate interval in
@@ -51,7 +51,8 @@ let run o =
 
   match o.date with
     | None -> list_dates o.start o.last selector o.fmt o.interval
-    | Some d -> exit (if Filter.filter selector d o.start then 0 else 1)
+    | Some d ->
+      exit ( if Filter.filter selector d o.start o.interval then 0 else 1)
 
 let () =
   let get_date opt =
@@ -80,16 +81,13 @@ let () =
   let set_end opt = o.last <- get_date opt in
   let set_fmt opt = o.fmt <- opt in
   let set_interval opt =
-    o.interval <- match opt with
-      | "day" -> Time.Days
-      | "week" -> Time.Weeks
-      | "month" -> Time.Months
-      | "year" -> Time.Years
-      | _ ->
+    o.interval <- match Time.interval_of_string opt with
+      | Some i -> i
+      | None ->
         prerr_endline ("Error: invalid interval '" ^ opt ^ "'");
         exit 2 in
 
-  ignore @@ Array.map (fun opt ->
+  Array.iter (fun opt ->
     match opt with
       | "-s" | "--start-date" -> current := set_start
       | "-e" | "--end-date" -> current := set_end

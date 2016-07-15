@@ -11,6 +11,8 @@ type interval
   | Years
   | Eternity
 
+val interval_of_string : string -> interval option
+
 module Month : sig
   type t
     = Jan | Feb | Mar | Apr | May | Jun

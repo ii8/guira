@@ -5,6 +5,7 @@ type state = {
   d : Time.t;
   r : Time.t;
   i : interval;
+  p : interval;
 }
 
 let eval n expression =
@@ -62,22 +63,34 @@ let filter_any i f s = function
     end
   | Opt _ -> assert false
 
-let rec filter_days s = function
-  | Opt (Weekday day) -> day = day_of_week s.d
-  | a -> filter_any Days filter_days s a
+let rec filter_days s opt =
+  if s.p > Days
+    then true
+    else match opt with
+      | Opt (Weekday day) -> day = day_of_week s.d
+      | a -> filter_any Days filter_days s a
 
-let rec filter_weeks s opt = filter_any Weeks filter_weeks s opt
+let rec filter_weeks s opt =
+  if s.p > Weeks
+    then true
+    else filter_any Weeks filter_weeks s opt
 
-let rec filter_months s = function
-  | Opt (Mensis m) -> m = month s.d
-  | a -> filter_any Months filter_months s a
+let rec filter_months s opt =
+  if s.p > Months
+    then true
+    else match opt with
+      | Opt (Mensis m) -> m = month s.d
+      | a -> filter_any Months filter_months s a
 
-let rec filter_years s = function
-  | Opt Leap -> leap (year s.d)
-  | Opt (Annus y) -> y = year s.d
-  | a -> filter_any Years filter_years s a
+let rec filter_years s opt =
+  if s.p > Years
+    then true
+    else match opt with
+      | Opt Leap -> leap (year s.d)
+      | Opt (Annus y) -> y = year s.d
+      | a -> filter_any Years filter_years s a
 
-let filter selector d r =
+let filter selector d r p =
   let rec f s = function
     | Day (opt, []) -> filter_days s opt
     | Day (opt, sub) -> if filter_days s opt
@@ -95,7 +108,7 @@ let filter selector d r =
     | Year (opt, sub) -> if filter_years s opt
       then List.exists (f { s with i = Years }) sub
       else false
-  in f { d; r; i = Eternity } selector
+  in f { d; r; i = Eternity; p } selector
 
 
 (* Tests *)

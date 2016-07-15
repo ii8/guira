@@ -9,6 +9,16 @@ type interval
   | Years
   | Eternity
 
+let interval_of_string = function
+  | "second" -> Some Seconds
+  | "minute" -> Some Minutes
+  | "hour"   -> Some Hours
+  | "day"    -> Some Days
+  | "week"   -> Some Weeks
+  | "month"  -> Some Months
+  | "year"   -> Some Years
+  | _ -> None
+
 module Month = struct
   type t
     = Jan | Feb | Mar | Apr | May | Jun
@@ -293,6 +303,10 @@ let test_diff () =
     diff (mk 15 Jun 3065) (mk 1 Jan 2016) = 383_305;
   ]
 
+let test_tfloor () =
+  tfloor (create ~hour:14 ~day:15 ~month:Jul 2016) Weeks =
+    create ~day:11 ~month:Jul 2016
+
 let test_this_monday () =
   List.for_all (fun a -> a) [
     this_monday (create ~day:7 2000) = (create ~day:3 2000);
@@ -315,6 +329,7 @@ let tests = [
     "Time.next", test_next;
     "Time.day_of_week", test_day_of_week;
     "Time.diff", test_diff;
+    "Time.tfloor", test_tfloor;
     "Time.this_monday", test_this_monday;
     "Time.first_week", test_first_week;
   ]
