@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8">
+  <title>Try Guira</title>
+  <style>
+body {
+  background-color: #F2A2D9;
+}
+
+#main {
+  width: 60%;
+  margin: auto;
+  margin-top: 100px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+input {
+  width: 100%;
+  height: 40px;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  border-bottom: 2px solid black;
+  font-size: 30px;
+  font-family: "Lucida Console", Monaco, monospace;
+  box-shadow: 0 10px 10px -10px #000;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+#list {
+  text-align: center;
+  list-style-type: none;
+  font-family: "Lucida Console", Monaco, monospace;
+  padding: 0;
+}
+
+  </style>
+  <script src="guira.js"></script>
+  <script>
+function run(selector)
+{
+  var ul = document.getElementById("list");
+  while (ul.hasChildNodes()) {
+    ul.removeChild(ul.lastChild);
+  }
+
+  var start = new Date();
+  var current = new Date();
+
+  for(i = 0; i < 365; i++) {
+    var b = false;
+    try {
+      b = guira(selector, current.toISOString(), start.toISOString(), "day");
+    } catch (e) {}
+
+    if(b) {
+      var li = document.createElement("li");
+      li.appendChild(document.createTextNode(current.toDateString()));
+      ul.appendChild(li);
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+}
+  </script>
+  </head>
+  <body>
+    <div id=main>
+      <h1>グイラ</h1>
+      <input type=text oninput="run(this.value)" autofocus>
+      <ul id=list>
+      </ul>
+    </div>
+  </body>
+</html>
