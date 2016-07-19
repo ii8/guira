@@ -23,6 +23,7 @@ let eval n expression =
 let eval_one i s expression =
   let first = tfloor s.d ~eternity:s.r s.i in
   let n = match i with
+    | Hours -> (diff s.d first) * 24 + 1 + hour s.d - hour first
     | Days -> diff s.d first + 1
     | Weeks ->
       let fw = first_week first in
@@ -30,7 +31,7 @@ let eval_one i s expression =
     | Months ->
       let m a = month a |> Month.to_int in
       (m s.d - (m first - 1)) + (year s.d - year first) * 12
-    | Years -> year s.d - year first
+    | Years -> year s.d - year first + 1
     | Eternity -> assert false in
   eval n expression
 
@@ -63,6 +64,13 @@ let filter_any i f s = function
     end
   | Opt _ -> assert false
 
+let rec filter_hours s opt =
+  if s.p > Hours
+    then true
+    else match opt with
+      | Opt (Hora h) -> h = hour s.d
+      | a -> filter_any Hours filter_hours s a
+
 let rec filter_days s opt =
   if s.p > Days
     then true
@@ -92,6 +100,10 @@ let rec filter_years s opt =
 
 let filter selector d r p =
   let rec f s = function
+    | Hour (opt, []) -> filter_hours s opt
+    | Hour (opt, sub) -> if filter_hours s opt
+      then List.exists (f { s with i = Hours }) sub
+      else false
     | Day (opt, []) -> filter_days s opt
     | Day (opt, sub) -> if filter_days s opt
       then List.exists (f { s with i = Days }) sub

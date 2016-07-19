@@ -243,7 +243,10 @@ let format t fmt =
         | 'b' -> a (Month.to_string t.month)
         | 'd' -> add0 t.day
         | 'F' -> a (to_string t)
+        | 'H' -> add0 t.hour
         | 'm' -> add0 (Month.to_int t.month)
+        | 'M' -> add0 t.minute
+        | 'S' -> add0 t.second
         | 'Y' -> a (string_of_int t.year)
         | '%' -> a "%"
         | _ -> a ("%" ^ String.make 1 c)

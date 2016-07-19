@@ -72,7 +72,7 @@ Otherwise it is in query-mode.
 
  * `-f`, `--format` `<format>`  
    Format of output dates, accepts a subset of strftime format strings;  
-   currently implements a, b, d, F, m and Y.
+   currently implements a, b, d, F, H, m, M, S and Y.
 
  * `-i`, `--interval` `(day|week|month|year)`  
    Interval at which dates should be checked in query-mode.  

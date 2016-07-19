@@ -13,6 +13,9 @@ type bexp =
   | Equal_to of exp * exp
   | Greater_than of exp * exp
 
+type houropt =
+  | Hora of int
+
 type dayopt =
   | Weekday of Time.Day_of_week.t
 
@@ -32,6 +35,7 @@ type 'a anyopt =
   | Opt of 'a
 
 and selector =
+  | Hour of houropt anyopt * selector list
   | Day of dayopt anyopt * selector list
   | Week of unit anyopt * selector list
   | Month of monthopt anyopt * selector list

@@ -57,6 +57,17 @@ let bexp_of_sexp = function
     Greater_than (exp_of_sexp x, exp_of_sexp y)
   | sexp -> Equal_to_n (exp_of_sexp sexp)
 
+type houropt =
+  | Hora of int
+
+let houropt_of_sexp = function
+  | Atom s ->
+    let h = int_of_string s in
+    if h > 23 || h < 0
+      then err ~e:"hours must be between 0 and 23" ()
+      else Hora h
+  | _ -> err ()
+
 type dayopt =
   | Weekday of Day_of_week.t
 
@@ -72,7 +83,7 @@ type monthopt =
 
 let monthopt_of_sexp = function
   | Atom s -> begin match Month.of_string s with
-      | Some day -> Mensis day
+      | Some m -> Mensis m
       | None -> expect ["a month"] s
     end
   | _ -> err ()
@@ -95,6 +106,7 @@ type 'a anyopt =
   | Opt of 'a
 
 and selector =
+  | Hour of houropt anyopt * selector list
   | Day of dayopt anyopt * selector list
   | Week of unit anyopt * selector list
   | Month of monthopt anyopt * selector list
@@ -111,7 +123,7 @@ let rec anyopt_of_sexp f = function
   | a -> Opt (f a)
 
 let selector_of_sexp sexp =
-  let selectors = ["day"; "week"; "month"; "year"] in
+  let selectors = ["hour"; "day"; "week"; "month"; "year"] in
   let rec self old = function
     | List (Atom s :: rest) ->
       let split = begin match rest with
@@ -123,6 +135,10 @@ let selector_of_sexp sexp =
       let mk1 f p = anyopt_of_sexp f (fst p) in
       let mk2 n p = List.map (self n) (snd p) in
       begin match s with
+        | "hour" ->
+          if old <= Hours
+            then err ~e:"unexpected hour selector" ()
+            else Hour (mk1 houropt_of_sexp split, mk2 Hours split)
         | "day" ->
           if old <= Days
             then err ~e:"unexpected day selector" ()
