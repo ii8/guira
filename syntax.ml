@@ -132,29 +132,17 @@ let selector_of_sexp sexp =
           when not (List.exists ((=) opt) selectors) -> (opts, sub)
         | sub -> (List [], sub)
       end in
-      let mk1 f p = anyopt_of_sexp f (fst p) in
-      let mk2 n p = List.map (self n) (snd p) in
+      let mk n f p =
+        if old <= n
+          then err ~e:("unexpected " ^ s ^ " selector") ()
+          else (anyopt_of_sexp f (fst p), List.map (self n) (snd p)) in
       begin match s with
-        | "hour" ->
-          if old <= Hours
-            then err ~e:"unexpected hour selector" ()
-            else Hour (mk1 houropt_of_sexp split, mk2 Hours split)
-        | "day" ->
-          if old <= Days
-            then err ~e:"unexpected day selector" ()
-            else Day (mk1 dayopt_of_sexp split, mk2 Days split)
-        | "week" ->
-          if old <= Weeks
-            then err ~e:"unexpected week selector" ()
-            else Week (mk1 (fun _ -> ()) split, mk2 Weeks split)
+        | "hour" -> let (a, b) = mk Hours houropt_of_sexp split in Hour (a, b)
+        | "day" -> let (a, b) = mk Days dayopt_of_sexp split in Day (a, b)
+        | "week" -> let (a, b) = mk Weeks (fun _ -> ()) split in Week (a, b)
         | "month" ->
-          if old <= Months
-            then err ~e:"unexpected month selector" ()
-            else Month (mk1 monthopt_of_sexp split, mk2 Months split)
-        | "year" ->
-          if old <= Years
-            then err ~e:"unexpected year selector" ()
-            else Year (mk1 yearopt_of_sexp split, mk2 Years split)
+          let (a, b) = mk Months monthopt_of_sexp split in Month (a, b)
+        | "year" -> let (a, b) = mk Years yearopt_of_sexp split in Year (a, b)
         | s -> expect selectors s
       end
     | _ -> err ()
