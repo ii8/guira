@@ -1,4 +1,4 @@
-
+<img align="right" src="https://sir-murray.github.io/guira/guira.svg">
 # Guira
 
 Guira is a schedule querying language.  
