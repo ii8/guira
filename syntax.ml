@@ -57,6 +57,16 @@ let bexp_of_sexp = function
     Greater_than (exp_of_sexp x, exp_of_sexp y)
   | sexp -> Equal_to_n (exp_of_sexp sexp)
 
+type minopt = Minuta of int
+
+let minopt_of_sexp = function
+  | Atom s ->
+    let m = int_of_string s in
+    if m > 59 || m < 0
+      then err ~e:"minutes must be between 0 and 59" ()
+      else Minuta m
+  | _ -> err ()
+
 type houropt =
   | Hora of int
 
@@ -106,6 +116,7 @@ type 'a anyopt =
   | Opt of 'a
 
 and selector =
+  | Minute of minopt anyopt * selector list
   | Hour of houropt anyopt * selector list
   | Day of dayopt anyopt * selector list
   | Week of unit anyopt * selector list
@@ -123,7 +134,7 @@ let rec anyopt_of_sexp f = function
   | a -> Opt (f a)
 
 let selector_of_sexp sexp =
-  let selectors = ["hour"; "day"; "week"; "month"; "year"] in
+  let selectors = ["minute"; "hour"; "day"; "week"; "month"; "year"] in
   let rec self old = function
     | List (Atom s :: rest) ->
       let split = begin match rest with
@@ -137,6 +148,8 @@ let selector_of_sexp sexp =
           then err ~e:("unexpected " ^ s ^ " selector") ()
           else (anyopt_of_sexp f (fst p), List.map (self n) (snd p)) in
       begin match s with
+        | "minute" ->
+          let (a, b) = mk Minutes minopt_of_sexp split in Minute (a, b)
         | "hour" -> let (a, b) = mk Hours houropt_of_sexp split in Hour (a, b)
         | "day" -> let (a, b) = mk Days dayopt_of_sexp split in Day (a, b)
         | "week" -> let (a, b) = mk Weeks (fun _ -> ()) split in Week (a, b)

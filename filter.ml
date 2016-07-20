@@ -22,6 +22,10 @@ let eval n expression =
 let eval_one i s expression =
   let first = tfloor s.d ~eternity:s.r s.i in
   let n = match i with
+    | Minutes ->
+      (diff s.d first) * 24 * 60 + 1
+      + (hour s.d - hour first) * 60
+      + (minute s.d - minute first)
     | Hours -> (diff s.d first) * 24 + 1 + hour s.d - hour first
     | Days -> diff s.d first + 1
     | Weeks ->
@@ -63,6 +67,10 @@ let filter_any i f s = function
     end
   | Opt _ -> assert false
 
+let rec filter_minutes s = function
+  | Opt (Minuta m) -> m = minute s.d
+  | a -> filter_any Minutes filter_minutes s a
+
 let rec filter_hours s = function
   | Opt (Hora h) -> h = hour s.d
   | a -> filter_any Hours filter_hours s a
@@ -94,6 +102,7 @@ let filter selector d r p =
           then List.exists (f { s with i = interval }) sub
           else false
   and f s = function
+    | Minute (o, ss) -> run_filter Minutes filter_minutes o s ss
     | Hour   (o, ss) -> run_filter Hours filter_hours o s ss
     | Day    (o, ss) -> run_filter Days filter_days o s ss
     | Week   (o, ss) -> run_filter Weeks filter_weeks o s ss

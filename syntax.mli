@@ -13,6 +13,8 @@ type bexp =
   | Equal_to of exp * exp
   | Greater_than of exp * exp
 
+type minopt = Minuta of int
+
 type houropt =
   | Hora of int
 
@@ -35,6 +37,7 @@ type 'a anyopt =
   | Opt of 'a
 
 and selector =
+  | Minute of minopt anyopt * selector list
   | Hour of houropt anyopt * selector list
   | Day of dayopt anyopt * selector list
   | Week of unit anyopt * selector list
