@@ -74,7 +74,7 @@ Otherwise it is in query-mode.
    Format of output dates, accepts a subset of strftime format strings;  
    currently implements a, b, d, F, H, m, M, S and Y.
 
- * `-i`, `--interval` `(day|week|month|year)`  
+ * `-i`, `--interval` `(minute|hour|day|week|month|year)`  
    Interval at which dates should be checked in query-mode.  
    All selectors in the query with greater precision than this interval
    will be ignored.
@@ -91,7 +91,7 @@ the program will exit with one of the following codes:
  * `2` - An error occurred, will be accompanied by a message on stderr.
 
 ## Selectors
-Available selectors are `year`, `month`, `week` and `day`.  
+Available selectors are `year`, `month`, `week`, `day`, `hour` and `minute`.  
 A selector can be applied to a condition and a list of subselectors:
 ```
 (month                ; selector
@@ -113,7 +113,7 @@ an 'integer' terminal.
 **Grammar**
 ```
 selector ::= '(' interval [condition] {selector} ')'
-interval ::= 'year' | 'month' | 'week' | 'day'
+interval ::= 'year' | 'month' | 'week' | 'day' | 'hour' | 'minute'
 ```
 
 ## Conditions
@@ -151,7 +151,7 @@ will be implicitly compared to "n" for equality.
 
 `eq` checks for equality.  
 `gt` checks if its first argument is greater than the second.  
-`sum` adds all of its arguments.  
+`+` adds all of its arguments.  
 `mod` finds the remainder of dividing its first argument by the second.  
 
 **Grammar**
@@ -162,7 +162,7 @@ boolean-expression ::= expression
 
 expression ::= 'n'
              | integer
-             | '(' 'sum' expression {expression} ')'
+             | '(' '+' expression {expression} ')'
              | '(' 'mod' expression expression ')'
 ```
 
@@ -194,6 +194,22 @@ Days can be selected by a three letter weekday.
 **Grammar**
 ```
 selector-condition ::= 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
+```
+
+## hour
+Hours can be selected by its integer value on a 24 hour clock.
+
+**Grammar**
+```
+selector-condition ::= integer
+```
+
+## minute
+Minutes can be selected with an integer between 0 and 59
+
+**Grammar**
+```
+selector-condition ::= integer
 ```
 
 ## The Javascript library

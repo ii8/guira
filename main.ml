@@ -18,7 +18,8 @@ let usage () = print_endline "\
     last day to query\n  \
     -f  --format FORMAT                   \
     strftime output format\n  \
-    -i  --interval (day|week|month|year)  \
+    -i  --interval (minute|hour|day\
+    \n                  |week|month|year)     \
     interval at which dates are queried\n  \
     -h  --help                            \
     print this help and exit\
