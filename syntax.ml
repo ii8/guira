@@ -115,7 +115,7 @@ type 'a anyopt =
   | Nth of bexp * 'a anyopt option
   | Opt of 'a
 
-and selector =
+type selector =
   | Minute of minopt anyopt * selector list
   | Hour of houropt anyopt * selector list
   | Day of dayopt anyopt * selector list

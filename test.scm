@@ -111,3 +111,4 @@
     (display "Some functional tests have failed")
     (display end)))
 (newline)
+(exit ret)

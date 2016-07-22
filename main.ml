@@ -95,6 +95,7 @@ let () =
       | "-f" | "--format" -> current := set_fmt
       | "-i" | "--interval" -> current := set_interval
       | "-h" | "--help" -> o.help <- true
+      | "" -> ()
       | _ -> begin match String.get opt 0 with
         | '-' -> noop opt
         | _ -> !current opt; current := set_date

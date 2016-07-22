@@ -17,5 +17,5 @@ let () =
   prerr_newline ();
   if !pass
     then prerr_endline (green ^ "All unit tests have passed" ^ stop)
-    else prerr_endline (red ^ "Some unit tests have failed" ^ stop)
+    else (prerr_endline (red ^ "Some unit tests have failed" ^ stop); exit 1)
 
