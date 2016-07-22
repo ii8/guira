@@ -152,7 +152,11 @@ let selector_of_sexp sexp =
           let (a, b) = mk Minutes minopt_of_sexp split in Minute (a, b)
         | "hour" -> let (a, b) = mk Hours houropt_of_sexp split in Hour (a, b)
         | "day" -> let (a, b) = mk Days dayopt_of_sexp split in Day (a, b)
-        | "week" -> let (a, b) = mk Weeks (fun _ -> ()) split in Week (a, b)
+        | "week" ->
+          let (a, b) = mk Weeks (function
+            List [] -> ()
+            | _ -> err ~e:"week selector cannot have options" ()) split in
+          Week (a, b)
         | "month" ->
           let (a, b) = mk Months monthopt_of_sexp split in Month (a, b)
         | "year" -> let (a, b) = mk Years yearopt_of_sexp split in Year (a, b)
