@@ -90,7 +90,7 @@ let rec filter_years s = function
   | Opt (Annus y) -> y = year s.d
   | a -> filter_any Years filter_years s a
 
-let filter selector d r p =
+let filter r p selector d =
   let rec run_filter : 'a.
     interval -> (state -> 'a -> bool) -> 'a -> state -> selector list -> bool =
   fun interval ff opt s ss ->

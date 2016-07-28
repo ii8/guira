@@ -27,7 +27,7 @@ let usage () = print_endline "\
 
 let list_dates sdate edate selector fmt interval =
   let check d =
-    if Filter.filter selector d sdate interval
+    if Filter.filter sdate interval selector d
       then print_endline (Time.format d fmt) in
 
   let rs = Time.tfloor sdate interval in
@@ -53,7 +53,7 @@ let run o =
   match o.date with
     | None -> list_dates o.start o.last selector o.fmt o.interval
     | Some d ->
-      exit ( if Filter.filter selector d o.start o.interval then 0 else 1)
+      exit ( if Filter.filter o.start o.interval selector d then 0 else 1)
 
 let () =
   let get_date opt =

@@ -7,3 +7,4 @@ guira
 *.cmo
 *.cmx
 *.o
+*.so
