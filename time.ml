@@ -198,6 +198,10 @@ let this_monday t =
         day = days_in_month t.year new_month + i }
     else { t with day = i }
 
+let this_thursday t =
+  let f = fun a -> next a Days in
+  t |> this_monday |> f |> f |> f
+
 let tfloor t ?eternity:(e = create 0) = function
   | Seconds -> t
   | Minutes -> { t with second = 0 }
@@ -216,6 +220,9 @@ let first_week t =
   |> (fun d -> if d < 0 then d + 7 else d)
   |> loop t
   |> this_monday
+
+let week_of_month t =
+  (this_thursday t).day / 7 + 1
 
 let of_string s =
   let year = int_of_string (String.sub s 0 4) in

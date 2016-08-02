@@ -58,8 +58,10 @@ val next : t -> interval -> t
 val diff : t -> t -> int
 val leap : int -> bool
 
+val week_of_month : t -> int
 val day_of_week : t -> Day_of_week.t
 val this_monday : t -> t
+val this_thursday : t -> t
 val first_week : t -> t
 val tfloor : t -> ?eternity:t -> interval -> t
 

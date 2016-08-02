@@ -78,6 +78,8 @@
     "(year ad2016 (month sep (week 1)))"
     (list "2016-08-29"))
 
+))
+
 (newline)
 (display "|| Starting functional tests ||")
 (newline)
