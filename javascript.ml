@@ -1,5 +1,5 @@
 
-let f s d r p =
+let f r p s d =
   Js.bool @@ Filter.filter
     (Js.to_string r |> Time.of_string)
     (Js.to_string p |> Time.interval_of_string
