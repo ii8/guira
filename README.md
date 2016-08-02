@@ -7,6 +7,8 @@ defined in the guira language.
 
 [Try in the browser](https://sir-murray.github.com/guira)
 
+IRC: [#guira on freenode](http://webchat.freenode.net/?channels=guira&uio=OT10cnVlJjExPTI5Nwd8)
+
 ## Installing
 You need ocaml and findlib(often comes with ocaml)
 ```
@@ -185,12 +187,12 @@ CREATE FUNCTION guira RETURNS INTEGER SONAME "guira.so";
 ```
 And then the function can be used:
 ```SQL
-mysql> SELECT GUIRA("2010-01-01", "day", "(month (day (eq (mod n 3) 0)))", "2015-04-15");
-+----------------------------------------------------------------------------+
-| GUIRA("2010-01-01", "day", "(month (day (eq (mod n 3) 0)))", "2015-04-15") |
-+----------------------------------------------------------------------------+
-|                                                                          1 |
-+----------------------------------------------------------------------------+
+mysql> SELECT GUIRA("2010-01-01", "day", "(month (day (eq (mod n 3) 0)))", "2015-04-15") AS berd;
++------+
+| berd |
++------+
+|    1 |
++------+
 1 row in set (0.00 sec)
 ```
 it returns 1 if the query matches, 0 otherwise.
