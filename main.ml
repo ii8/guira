@@ -27,11 +27,21 @@ let usage () = print_endline "\
 
 let list_dates sdate edate selector fmt interval =
   let check d =
+    let week_date d =
+      if interval = Time.Weeks
+        then Time.this_monday d
+        else d in
     if Filter.filter sdate interval selector d
-      then print_endline (Time.format d fmt) in
+      then print_endline (Time.format (week_date d) fmt) in
 
-  let rs = Time.tfloor sdate interval in
-  let re = Time.tfloor edate interval in
+  let f d =
+    let f = Time.tfloor d interval in
+    if interval = Time.Weeks
+      then Time.next (Time.next (Time.next f Time.Days) Time.Days) Time.Days
+      else f in
+
+  let rs = f sdate in
+  let re = f edate in
   let rec loop d =
     if re >= d
       then begin

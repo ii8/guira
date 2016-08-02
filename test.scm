@@ -48,7 +48,7 @@
 (define tests (list
   (test "Nth day" 1
     "-s 1992-04-04 1992-04-06"
-    "(day (nth 3))"
+    "(day 3)"
     0)
 
   (test "Or condition" 2
@@ -68,26 +68,15 @@
 
   (test "Complex subselectors" 2
     "-s 2000-01-01"
-    "(year 2016 (month (or jul (nth 8)) (day mon)) (month dec (day (nth 2))))"
+    "(year ad2016 (month (or jul 8) (day mon)) (month dec (day 2)))"
     (list
       "2016-07-04" "2016-07-11" "2016-07-18" "2016-07-25" "2016-08-01"
       "2016-08-08" "2016-08-15" "2016-08-22" "2016-08-29" "2016-12-02"))
 
-  (test "Nth with options" 2
-    "-s 1994-04-01 -e 1994-04-30"
-    "(month (day (nth 2 mon)))"
-    (list "1994-04-11"))
-
-  (test "Nth greater than n with options" 2
-    "-s 1994-04-01 -e 1994-04-30"
-    "(month (day (nth (gt n 2) mon)))"
-    (list "1994-04-18" "1994-04-25"))
-
-  (test "Third even day of 2017" 2
-    "-s 2016-01-01"
-    "(year 2017 (day (nth 3 (nth (eq (mod n 2) 0)))))"
-    (list "2017-01-06"))
-  ))
+  (test "First week of month" 2
+    "-s 2016-01-01 -i week"
+    "(year ad2016 (month sep (week 1)))"
+    (list "2016-08-29"))
 
 (newline)
 (display "|| Starting functional tests ||")

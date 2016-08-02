@@ -8,5 +8,6 @@ let f r p s d = try Filter.filter
 
 let _ = Callback.register "parse"
   (fun s -> try Sexp.parse_string s |> selector_of_sexp
-   with _ -> Year (Not All, []) )
+   with _ -> Selector (Time.Years, Not All, []))
+
 let _ = Callback.register "filter" f
