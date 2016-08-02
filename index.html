@@ -56,7 +56,7 @@ function run(selector)
   for(i = 0; i < 365; i++) {
     var b = false;
     try {
-      b = guira(selector, current.toISOString(), start.toISOString(), "day");
+      b = guira(start.toISOString(), "day", selector, current.toISOString());
     } catch (e) {}
 
     if(b) {
