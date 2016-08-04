@@ -77,14 +77,15 @@ Otherwise it is in query-mode.
  * `-e`, `--end-date` `<date>`  
    Last date to query, in check-mode this option is ignored.
 
- * `-f`, `--format` `<format>`  
-   Format of output dates, accepts a subset of strftime format strings;  
-   currently implements a, b, d, F, H, m, M, S and Y.
-
  * `-i`, `--interval` `(minute|hour|day|week|month|year)`  
    Interval at which dates should be checked in query-mode.  
    All selectors in the query with greater precision than this interval
-   will be ignored.
+   will be ignored.  
+   Defaults to the precision of the query.
+
+ * `-f`, `--format` `<format>`  
+   Format of output dates, accepts a subset of strftime format strings;  
+   currently implements a, b, d, F, H, m, M, S and Y.
 
  * `-h`, `--help`  
    Prints a very helpful message.

@@ -123,6 +123,9 @@ let valid t =
   if t.year < 0 then failwith "year cannot be less than 0";
   if t.day < 1 then failwith "day must be positive";
   if t.day > days_in_month t.year t.month then failwith "day too great";
+  if t.hour < 0 || t.hour > 23 then failwith "hour must be between 0 and 23";
+  if t.minute < 0 || t.minute > 59 then failwith "hours only have 60 minutes";
+  if t.second < 0 || t.second > 59 then failwith "invalid second";
   t
 
 let rec next date interval =
@@ -225,14 +228,22 @@ let week_of_month t =
   (this_thursday t).day / 7 + 1
 
 let of_string s =
-  let year = int_of_string (String.sub s 0 4) in
-  let mint = int_of_string (String.sub s 5 2) in
-  let month =
-    if mint > 12 || mint < 1
+  let y () = int_of_string (String.sub s 0 4) in
+  let m () =
+    let m = int_of_string (String.sub s 5 2) in
+    if m > 12 || m < 1
       then failwith "month must be between 1 and 12"
-      else Month.of_int mint in
-  let day = int_of_string (String.sub s 8 2) in
-  create ~day ~month year |> valid
+      else Month.of_int m in
+  let p b = int_of_string (String.sub s b 2) in
+  valid @@ match String.length s with
+    | 4 -> create (y ())
+    | 7 -> create ~month:(m ()) (y ())
+    | 10 -> create ~day:(p 8) ~month:(m ()) (y ())
+    | 13 -> create ~hour:(p 11) ~day:(p 8) ~month:(m ()) (y ())
+    | 16 -> create ~minute:(p 14) ~hour:(p 11) ~day:(p 8) ~month:(m ()) (y ())
+    | l when l >= 19 -> create ~second:(p 17) ~minute:(p 14) ~hour:(p 11)
+                               ~day:(p 8) ~month:(m ()) (y ())
+    | _ -> failwith "invalid date string"
 
 let to_string t =
   Printf.sprintf "%04u-%02u-%02u" t.year (Month.to_int t.month) t.day
