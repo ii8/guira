@@ -1,11 +1,11 @@
-<img align="right" src="https://sir-murray.github.io/guira/guira.svg">
+<img align="right" src="https://ii8.github.io/guira/guira.svg">
 # Guira
 
 Guira is a schedule querying language.  
 It allows querying sets of and checking individual dates against a schedule
 defined in the guira language.
 
-[Try in the browser](https://sir-murray.github.com/guira)
+[Try in the browser](https://ii8.github.com/guira)
 
 IRC: [#guira on freenode](http://webchat.freenode.net/?channels=guira&uio=OT10cnVlJjExPTI5Nwd8)
 
@@ -163,6 +163,7 @@ If there is no parent selector, the start date is used.
 ```
 expression ::= 'n'
              | 'week-of-month'
+             | 'day-of-month'
              | integer
              | '(' '+' expression {expression} ')'
              | '(' 'mod' expression expression ')'

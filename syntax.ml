@@ -18,6 +18,7 @@ let expect want got =
 type exp =
   | Variable
   | Var_week_of_month
+  | Var_day_of_month
   | Constant of int
   | Modulo of exp * exp
   | Sum of exp list
@@ -25,6 +26,7 @@ type exp =
 let rec exp_of_sexp = function
   | Atom "n" -> Variable
   | Atom "week-of-month" -> Var_week_of_month
+  | Atom "day-of-month" -> Var_day_of_month
   | Atom i -> Constant (int_of_string i)
   | List (Atom "mod" :: a :: b :: []) -> Modulo (exp_of_sexp a, exp_of_sexp b)
   | List (Atom "+" :: ints) -> Sum (List.map exp_of_sexp ints)

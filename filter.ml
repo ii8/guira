@@ -30,6 +30,7 @@ let ev i s exp =
   let rec f = function
     | Variable -> calc_n i s
     | Var_week_of_month -> week_of_month s.d
+    | Var_day_of_month -> day s.d
     | Constant x -> x
     | Modulo (x, y) -> (f x) mod (f y)
     | Sum xs -> List.map f xs |> List.fold_left (+) 0

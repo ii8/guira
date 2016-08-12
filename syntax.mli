@@ -4,6 +4,7 @@ exception Syntax of string
 type exp =
   | Variable
   | Var_week_of_month
+  | Var_day_of_month
   | Constant of int
   | Modulo of exp * exp
   | Sum of exp list
