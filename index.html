@@ -41,32 +41,31 @@ input {
 }
 
   </style>
-  <script src="guira.js"></script>
   <script>
+var w = new Worker("worker.js");
+
+function add_item(i)
+{
+  var ul = document.getElementById("list");
+  var li = document.createElement("li");
+
+  li.appendChild(document.createTextNode(i.data));
+  ul.appendChild(li);
+}
+
 function run(selector)
 {
   var ul = document.getElementById("list");
+
+  w.terminate();
+  w = new Worker("worker.js");
+  w.onmessage = add_item;
+
   while (ul.hasChildNodes()) {
     ul.removeChild(ul.lastChild);
   }
 
-  var start = new Date();
-  var current = new Date();
-
-  for(i = 0; i < 365; i++) {
-    var b = false;
-    try {
-      b = guira(start.toISOString(), "day", selector, current.toISOString());
-    } catch (e) {}
-
-    if(b) {
-      var li = document.createElement("li");
-      li.appendChild(document.createTextNode(current.toDateString()));
-      ul.appendChild(li);
-    }
-
-    current.setDate(current.getDate() + 1);
-  }
+  w.postMessage(selector);
 }
   </script>
   </head>
