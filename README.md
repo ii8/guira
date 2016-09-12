@@ -10,7 +10,7 @@ defined in the guira language.
 IRC: [#guira on freenode](http://webchat.freenode.net/?channels=guira&uio=OT10cnVlJjExPTI5Nwd8)
 
 ## Installing
-You need ocaml and findlib(often comes with ocaml)
+You need ocaml(version 4.02.0 or later) and findlib
 ```
 make
 make install
