@@ -15,6 +15,10 @@ let expect want got =
     | _ -> "nothing" in
   err ~e:("expected " ^ s ^ " but got '" ^ got ^ "'") ()
 
+let ios s =
+  try int_of_string s with
+    _ -> err ~e:("invalid integer: " ^ s) ()
+
 type exp =
   | Variable
   | Var_week_of_month
@@ -27,7 +31,7 @@ let rec exp_of_sexp = function
   | Atom "n" -> Variable
   | Atom "week-of-month" -> Var_week_of_month
   | Atom "day-of-month" -> Var_day_of_month
-  | Atom i -> Constant (int_of_string i)
+  | Atom i -> Constant (ios i)
   | List (Atom "mod" :: a :: b :: []) -> Modulo (exp_of_sexp a, exp_of_sexp b)
   | List (Atom "+" :: ints) -> Sum (List.map exp_of_sexp ints)
   | List (Atom s :: _) -> expect ["+"; "mod"] s
@@ -63,7 +67,7 @@ let rec bexp_of_sexp = function
       | None ->
         let l = String.length s in
         if l > 2 && s.[0] = 'a' && s.[1] = 'd'
-          then Annus (int_of_string (String.sub s 2 (l - 2)))
+          then Annus (ios (String.sub s 2 (l - 2)))
           else Equal_to_n (exp_of_sexp sexp)
   end
   | sexp -> Equal_to_n (exp_of_sexp sexp)

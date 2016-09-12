@@ -72,7 +72,6 @@ let parse () =
   try Sexp.parse_stdin () |> Syntax.selector_of_sexp with
     | a -> begin match a with
       | Syntax.Syntax e -> prerr_endline ("Error: " ^ e)
-      | Failure "int_of_string" -> prerr_endline "Error: bad integer"
       | Failure e -> prerr_endline ("Error: " ^ e)
       | _ -> prerr_endline "Error: invalid expression"
     end; exit 2
