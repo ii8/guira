@@ -8,15 +8,30 @@ body {
   background-color: #F2A2D9;
 }
 
-#main {
+#container {
   width: 60%;
   margin: auto;
   margin-top: 100px;
 }
 
+#examples {
+  width: 30%;
+  margin-top: 100px;
+  float: left;
+}
+
+#main {
+  width: 70%;
+  float: left;
+}
+
 h1 {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 80px;
+}
+
+h2 {
+  font-family: "Lucida Console", Monaco, monospace;
 }
 
 input {
@@ -33,13 +48,24 @@ input {
   text-align: center;
 }
 
-#list {
-  text-align: center;
+ul {
   list-style-type: none;
   font-family: "Lucida Console", Monaco, monospace;
   padding: 0;
 }
 
+#list {
+  text-align: center;
+}
+
+#elist > li {
+  line-height: 170%;
+}
+
+#elist > li:hover {
+  color: #ffc;
+  cursor: pointer;
+}
   </style>
   <script>
 var w = new Worker("worker.js");
@@ -67,14 +93,49 @@ function run(selector)
 
   w.postMessage(selector);
 }
+
+function use()
+{
+  var selector = this.innerHTML;
+  document.getElementById("query").value = selector;
+  run(selector);
+}
+
+function onload()
+{
+  var l = document.getElementById("elist").childNodes;
+  for (var i = 0; i < l.length; i++)
+    l[i].onclick = use;
+}
   </script>
   </head>
-  <body>
-    <div id=main>
+  <body onload="onload()">
+    <div id=container>
       <h1>グイラ</h1>
-      <input type=text oninput="run(this.value)" autofocus>
-      <ul id=list>
-      </ul>
+      <div id=examples>
+        <h2>Examples</h1>
+        <ul id=elist>
+          <li>(day)</li>
+          <li>(day 1)</li>
+          <li>(day mon)</li>
+          <li>(month jul)</li>
+          <li>(month aug (day 1))</li>
+          <li>(month 2 (day fri))</li>
+          <li>(day (or mon fri sat))</li>
+          <li>(day (+ 4 3))</li>
+          <li>(year (day (+ 12 7 2)))</li>
+          <li>(year leap (month feb))</li>
+          <li>(year (eq 3 n) (day 1))</li>
+          <li>(day (gt 12 n))</li>
+          <li>(month (day (gt n 30)))</li>
+          <li>(day (eq (mod n 2) 0))</li>
+        </ul>
+      </div>
+      <div id=main>
+        <input id=query type=text oninput="run(this.value)" autofocus>
+        <ul id=list>
+        </ul>
+      </div>
     </div>
   </body>
 </html>
