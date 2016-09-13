@@ -16,6 +16,8 @@ make
 make install
 ```
 
+**Optional extras**
+
 To generate javascript run `make js`
 (requires [js_of_ocaml](http://ocsigen.org/js_of_ocaml))
 
