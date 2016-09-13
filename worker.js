@@ -10,7 +10,10 @@ onmessage = function(e) {
 
     try {
       b = guira(start.toISOString(), "day", e.data, current.toISOString());
-    } catch (ex) {}
+    } catch (ex) {
+      postMessage("error");
+      break;
+    }
 
     if (b)
       postMessage(i-- == 1 ? "..." : current.toDateString());
