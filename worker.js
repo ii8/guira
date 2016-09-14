@@ -4,8 +4,9 @@ onmessage = function(e) {
   var start = new Date();
   var current = new Date();
   var i = 100;
+  var first = true;
 
-  while (i) {
+  while (i && current.getFullYear() < 10000) {
     var b = false;
 
     try {
@@ -13,6 +14,11 @@ onmessage = function(e) {
     } catch (ex) {
       postMessage("error");
       break;
+    }
+
+    if (first) {
+      postMessage("success");
+      first = false;
     }
 
     if (b)

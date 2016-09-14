@@ -63,22 +63,26 @@ ul {
 }
   </style>
   <script>
+if (typeof(Worker) == "undefined") {
+  alert('Webworker support required (not for guira, but for this demo)');
+  throw '';
+}
+
 var w = new Worker("worker.js");
 
 function add_item(i)
 {
-  var ul = document.getElementById("list");
-  var li = document.createElement("li");
-
   if (i.data == "error") {
     document.getElementById("query").style.color = '#c30';
-    return;
-  } else {
+  } else if (i.data == "success") {
     document.getElementById("query").style.color = '';
-  }
+  } else {
+    var ul = document.getElementById("list");
+    var li = document.createElement("li");
 
-  li.appendChild(document.createTextNode(i.data));
-  ul.appendChild(li);
+    li.appendChild(document.createTextNode(i.data));
+    ul.appendChild(li);
+  }
 }
 
 function run(selector)
