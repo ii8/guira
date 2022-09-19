@@ -6,9 +6,7 @@ Guira is a schedule querying language.
 It allows querying sets of and checking individual dates against a schedule
 defined in the guira language.
 
-[Try in the browser](https://ii8.github.com/guira)
-
-IRC: [#guira on freenode](http://webchat.freenode.net/?channels=guira&uio=OT10cnVlJjExPTI5Nwd8)
+[Try in the browser](https://ii8.github.io/guira)
 
 ## Installing
 You need ocaml(version 4.02.0 or later) and findlib
